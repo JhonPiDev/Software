@@ -1,0 +1,74 @@
+/* Estilos generales */
+.font-sans {
+  font-family: 'Arial', sans-serif;
+}
+
+.bg-gray-100 {
+  background-color: #f7fafc;
+}
+
+.bg-blue-400 {
+  background-color: #63b3ed;
+}
+
+.bg-red-400 {
+  background-color: #fc8181;
+}
+
+.bg-blue-500 {
+  background-color: #4299e1;
+}
+
+.bg-red-500 {
+  background-color: #f56565;
+}
+
+/* Tarjetas de fondo */
+.card {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+}
+
+/* Formulario de Login */
+.rounded-3xl {
+  border-radius: 1.5rem;
+}
+
+.shadow-md {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.hover\:bg-blue-100:hover {
+  background-color: #ebf8ff;
+}
+
+.focus\:bg-blue-100:focus {
+  background-color: #ebf8ff;
+}
+
+/* Inputs */
+input {
+  transition: all 0.3s ease;
+}
+
+/* Botones */
+button {
+  transition: all 0.3s ease;
+}
+
+.hover\:shadow-inner:hover {
+  box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+}
+
+/* Mensajes de error */
+.invalid-feedback {
+  color: #e53e3e;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+}
+
+.is-invalid {
+  border-color: #e53e3e;
+}
