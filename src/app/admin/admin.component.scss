@@ -1,0 +1,10 @@
+/* Estilos para dispositivos pequeños */
+@media (max-width: 768px) {
+    .flex-wrap {
+        display: flex;
+        flex-wrap: wrap;
+    }
+    .section-small {
+        width: 50%;
+    }
+}

@@ -1,1 +1,69 @@
-<p>admin works!</p>
+<div class="flex flex-col h-screen bg-gray-100">
+    
+    <!-- Barra de navegación superior -->
+    <div class="bg-white shadow w-full p-2 flex items-center justify-between">
+      <div class="flex items-center">
+        <div class="hidden md:flex items-center">
+          <img src="https://www.emprenderconactitud.com/img/POC%20WCS%20(1).png" alt="Logo" class="w-28 h-18 mr-2">
+          <h2 class="font-bold text-xl text-gray-800">Nombre de la Aplicación</h2>
+        </div>
+        <div class="md:hidden flex items-center">
+          <button (click)="toggleSideNav()">
+            <i class="fas fa-bars text-gray-500 text-lg"></i>
+          </button>
+        </div>
+      </div>
+  
+      <!-- Íconos de Notificación y Perfil -->
+      <div class="space-x-5">
+        <button (click)="showNotifications()">
+          <i class="fas fa-bell text-gray-500 text-lg"></i>
+        </button>
+        <button (click)="showProfile()">
+          <i class="fas fa-user text-gray-500 text-lg"></i>
+        </button>
+      </div>
+    </div>
+  
+    <!-- Contenido principal -->
+    <div class="flex-1 flex">
+      <!-- Barra lateral de navegación -->
+      <div class="p-2 bg-white w-60 flex flex-col" [class.hidden]="!isSideNavVisible">
+        <nav>
+            <a class="block text-gray-500 py-2.5 px-4 my-4 rounded transition duration-200 hover:bg-gradient-to-r hover:from-cyan-400 hover:to-cyan-300 hover:text-white" 
+            routerLink="/admin/home" 
+            routerLinkActive="bg-gradient-to-r from-cyan-400 to-cyan-300 text-white">
+           <i class="fas fa-home mr-2"></i>Inicio
+         </a>
+          <a class="block text-gray-500 py-2.5 px-4 my-4 rounded transition duration-200 hover:bg-gradient-to-r hover:from-cyan-400 hover:to-cyan-300 hover:text-white" routerLink="/admin/auth" routerLinkActive="bg-gradient-to-r from-cyan-400 to-cyan-300 text-white">
+            <i class="fas fa-file-alt mr-2"></i>Autorizaciones
+          </a>
+          <a class="block text-gray-500 py-2.5 px-4 my-4 rounded transition duration-200 hover:bg-gradient-to-r hover:from-cyan-400 hover:to-cyan-300 hover:text-white" routerLink="/admin/users" routerLinkActive="bg-gradient-to-r from-cyan-400 to-cyan-300 text-white">
+            <i class="fas fa-users mr-2"></i>Usuarios
+          </a>
+          <a class="block text-gray-500 py-2.5 px-4 my-4 rounded transition duration-200 hover:bg-gradient-to-r hover:from-cyan-400 hover:to-cyan-300 hover:text-white" routerLink="/admin/commerces" routerLinkActive="bg-gradient-to-r from-cyan-400 to-cyan-300 text-white">
+            <i class="fas fa-store mr-2"></i>Comercios
+          </a>
+          <a class="block text-gray-500 py-2.5 px-4 my-4 rounded transition duration-200 hover:bg-gradient-to-r hover:from-cyan-400 hover:to-cyan-300 hover:text-white" routerLink="/admin/transactions" routerLinkActive="bg-gradient-to-r from-cyan-400 to-cyan-300 text-white">
+            <i class="fas fa-exchange-alt mr-2"></i>Transacciones
+          </a>
+        </nav>
+  
+        <!-- Cerrar Sesión -->
+        <a class="block text-gray-500 py-2.5 px-4 my-2 rounded transition duration-200 hover:bg-gradient-to-r hover:from-cyan-400 hover:to-cyan-300 hover:text-white mt-auto" (click)="logout()">
+          <i class="fas fa-sign-out-alt mr-2"></i>Cerrar sesión
+        </a>
+  
+        <!-- Línea de gradiente -->
+        <div class="bg-gradient-to-r from-cyan-300 to-cyan-500 h-px mt-2"></div>
+  
+        <!-- Copyright -->
+      </div>
+  
+      <!-- Área de contenido principal -->
+      <div class="flex-1 p-4">
+        <router-outlet> </router-outlet> <!-- Aquí se cargarán los componentes hijos -->
+      </div>
+      
+    </div>
+  </div>

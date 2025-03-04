@@ -1,0 +1,48 @@
+<div class="p-6">
+  <!-- Título de bienvenida -->
+  <h1 class="text-3xl font-bold text-gray-800 mb-4">Bienvenido al Panel de Administración</h1>
+
+  <!-- Descripción -->
+  <p class="text-gray-600 mb-6">
+    Desde aquí puedes gestionar todas las funcionalidades de tu aplicación. Utiliza el menú lateral para navegar entre las diferentes secciones.
+  </p>
+
+  <!-- Tarjetas de resumen -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <!-- Tarjeta 1: Usuarios -->
+    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+      <h2 class="text-xl font-semibold text-gray-800 mb-2">Usuarios</h2>
+      <p class="text-gray-600 mb-4">Gestiona los usuarios registrados en la plataforma.</p>
+      <a routerLink="/admin/users" class="text-blue-500 hover:text-blue-700">Ver más →</a>
+    </div>
+
+    <!-- Tarjeta 2: Autorizaciones -->
+    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+      <h2 class="text-xl font-semibold text-gray-800 mb-2">Autorizaciones</h2>
+      <p class="text-gray-600 mb-4">Revisa y aprueba las solicitudes pendientes.</p>
+      <a routerLink="/admin/auth" class="text-blue-500 hover:text-blue-700">Ver más →</a>
+    </div>
+
+    <!-- Tarjeta 3: Comercios -->
+    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+      <h2 class="text-xl font-semibold text-gray-800 mb-2">Comercios</h2>
+      <p class="text-gray-600 mb-4">Administra los comercios registrados.</p>
+      <a routerLink="/admin/commerces" class="text-blue-500 hover:text-blue-700">Ver más →</a>
+    </div>
+
+    <!-- Tarjeta 4: Transacciones -->
+    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+      <h2 class="text-xl font-semibold text-gray-800 mb-2">Transacciones</h2>
+      <p class="text-gray-600 mb-4">Revisa el historial de transacciones.</p>
+      <a routerLink="/admin/transactions" class="text-blue-500 hover:text-blue-700">Ver más →</a>
+    </div>
+  </div>
+
+  <!-- Gráfico de resumen -->
+  <div class="bg-white p-6 rounded-lg shadow-md">
+    <h2 class="text-xl font-semibold text-gray-800 mb-4">Resumen de Actividad</h2>
+    <div class="chart-container" style="position: relative; height: 300px;">
+      <canvas id="activityChart"></canvas>
+    </div>
+  </div>
+</div>
