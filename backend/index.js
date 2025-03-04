@@ -37,13 +37,13 @@ app.post('/login', (req, res) => {
   const query = 'SELECT * FROM users WHERE username = ? AND password = ?';
   db.query(query, [username, password], (err, results) => {
     if (err) {
-      return res.status(500).send(err); // Error del servidor
+      return res.status(500).send(err);
     }
     if (results.length > 0) {
-      // Usuario encontrado
+      // Respuesta exitosa
       res.status(200).send({ message: 'Login successful', user: results[0] });
     } else {
-      // Usuario no encontrado
+      // Credenciales incorrectas
       res.status(401).send({ message: 'Invalid credentials' });
     }
   });

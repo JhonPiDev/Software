@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router'; // Importa el Router
 
 @Component({
   selector: 'app-login',
@@ -12,27 +13,34 @@ import { CommonModule } from '@angular/common';
 })
 export class LoginComponent {
   loginForm: FormGroup;
+  errorMessage: string = ''; // Variable para mostrar mensajes de error
 
-  constructor(private fb: FormBuilder, private http: HttpClient) {
+  constructor(private fb: FormBuilder, private http: HttpClient, private router: Router) {
     this.loginForm = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
+      username: ['', [Validators.required]], // Cambia 'email' a 'username'
       password: ['', [Validators.required, Validators.minLength(6)]],
     });
   }
 
   onSubmit() {
+    console.log('Botón de login clickeado'); // Log para verificar que el método se ejecuta
+  
     if (this.loginForm.invalid) {
+      console.log('Formulario inválido'); // Log si el formulario es inválido
       return;
     }
-
-    const user = this.loginForm.value;
-
-    this.http.post('http://localhost:3000/login', user).subscribe(
+  
+    const { username, password } = this.loginForm.value;
+    console.log('Datos enviados:', { username, password }); // Log de los datos enviados
+  
+    this.http.post('http://localhost:3000/login', { username, password }).subscribe(
       (response: any) => {
-        console.log('Login successful', response);
+        console.log('Respuesta del backend:', response); // Log de la respuesta del backend
+        this.router.navigate(['/admin']);
       },
       (error) => {
-        console.error('Login failed', error);
+        console.error('Error en la solicitud:', error); // Log de errores
+        this.errorMessage = 'Credenciales incorrectas. Inténtalo de nuevo.';
       }
     );
   }

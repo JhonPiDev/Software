@@ -1,130 +1,132 @@
 <div class="font-sans">
-    <div class="relative min-h-screen flex flex-col sm:justify-center items-center bg-gray-100">
-      <div class="relative sm:max-w-sm w-full">
-        <!-- Tarjetas de fondo -->
-        <div class="card bg-blue-400 shadow-lg w-full h-full rounded-3xl absolute transform -rotate-6"></div>
-        <div class="card bg-red-400 shadow-lg w-full h-full rounded-3xl absolute transform rotate-6"></div>
-  
-        <!-- Formulario de Login -->
-        <div class="relative w-full rounded-3xl px-6 py-4 bg-gray-100 shadow-md">
-          <label class="block mt-3 text-sm text-gray-700 text-center font-semibold">
-            Login
-          </label>
-  
-          <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="mt-10">
-            <!-- Campo de Email -->
-            <div>
-              <input
-                type="email"
-                formControlName="email"
-                placeholder="Correo electrónico"
-                class="mt-1 block w-full border-none bg-gray-100 h-11 rounded-xl shadow-lg hover:bg-blue-100 focus:bg-blue-100 focus:ring-0"
-                [ngClass]="{
-                  'is-invalid': loginForm.get('email')?.invalid && loginForm.get('email')?.touched
-                }"
-              />
-              <!-- Mensaje de error para el email -->
-              <div
-                *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched"
-                class="invalid-feedback"
-              >
-                <div *ngIf="loginForm.get('email')?.errors?.['required']">
-                  Email es requerido.
-                </div>
-                <div *ngIf="loginForm.get('email')?.errors?.['email']">
-                  Por favor ingresa un email válido.
-                </div>
-              </div>
-            </div>
-  
-            <!-- Campo de Contraseña -->
-            <div class="mt-7">
-              <input
-                type="password"
-                formControlName="password"
-                placeholder="Contraseña"
-                class="mt-1 block w-full border-none bg-gray-100 h-11 rounded-xl shadow-lg hover:bg-blue-100 focus:bg-blue-100 focus:ring-0"
-                [ngClass]="{
-                  'is-invalid': loginForm.get('password')?.invalid && loginForm.get('password')?.touched
-                }"
-              />
-              <!-- Mensaje de error para la contraseña -->
-              <div
-                *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
-                class="invalid-feedback"
-              >
-                <div *ngIf="loginForm.get('password')?.errors?.['required']">
-                  Contraseña es requerida.
-                </div>
-                <div *ngIf="loginForm.get('password')?.errors?.['minlength']">
-                  La contraseña debe tener al menos 6 caracteres.
-                </div>
-              </div>
-            </div>
-  
-            <!-- Recordar y Olvidar Contraseña -->
-            <div class="mt-7 flex">
-              <label for="remember_me" class="inline-flex items-center w-full cursor-pointer">
-                <input
-                  id="remember_me"
-                  type="checkbox"
-                  class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                  name="remember"
-                />
-                <span class="ml-2 text-sm text-gray-600"> Recuerdame </span>
-              </label>
-  
-              <div class="w-full text-right">
-                <a class="underline text-sm text-gray-600 hover:text-gray-900" href="#">
-                  ¿Olvidó su contraseña?
-                </a>
-              </div>
-            </div>
-  
-            <!-- Botón de Login -->
-            <div class="mt-7">
-              <button
-                type="submit"
-                class="bg-blue-500 w-full py-3 rounded-xl text-white shadow-xl hover:shadow-inner focus:outline-none transition duration-500 ease-in-out transform hover:-translate-x hover:scale-105"
-                [disabled]="loginForm.invalid"
-              >
-                Login
-              </button>
-            </div>
-  
-            <!-- Separador "Accede con" -->
-            <div class="flex mt-7 items-center text-center">
-              <hr class="border-gray-300 border-1 w-full rounded-md" />
-              <label class="block font-medium text-sm text-gray-600 w-full"> Accede con </label>
-              <hr class="border-gray-300 border-1 w-full rounded-md" />
-            </div>
-  
-            <!-- Botones de Redes Sociales -->
-            <div class="flex mt-7 justify-center w-full">
-              <button
-                class="mr-5 bg-blue-500 border-none px-4 py-2 rounded-xl cursor-pointer text-white shadow-xl hover:shadow-inner transition duration-500 ease-in-out transform hover:-translate-x hover:scale-105"
-              >
-                Facebook
-              </button>
-  
-              <button
-                class="bg-red-500 border-none px-4 py-2 rounded-xl cursor-pointer text-white shadow-xl hover:shadow-inner transition duration-500 ease-in-out transform hover:-translate-x hover:scale-105"
-              >
-                Google
-              </button>
-            </div>
-  
-            <!-- Enlace de Registro -->
-            <div class="mt-7">
-              <div class="flex justify-center items-center">
-                <label class="mr-2">¿Eres nuevo?</label>
-                <a href="#" class="text-blue-500 transition duration-500 ease-in-out transform hover:-translate-x hover:scale-105">
-                  Crea una cuenta
-                </a>
-              </div>
-            </div>
-          </form>
+  <div class="relative min-h-screen flex flex-col sm:justify-center items-center bg-gray-100">
+    <div class="relative sm:max-w-sm w-full">
+      <!-- Tarjetas de fondo -->
+      <div class="card bg-blue-400 shadow-lg w-full h-full rounded-3xl absolute transform -rotate-6"></div>
+      <div class="card bg-red-400 shadow-lg w-full h-full rounded-3xl absolute transform rotate-6"></div>
+
+      <!-- Formulario de Login -->
+      <div class="relative w-full rounded-3xl px-6 py-4 bg-gray-100 shadow-md">
+        <label class="block mt-3 text-sm text-gray-700 text-center font-semibold">
+          Login
+        </label>
+
+        <!-- Mensaje de error general -->
+        <div *ngIf="errorMessage" class="error-message">
+          {{ errorMessage }}
         </div>
+
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="mt-10">
+          <!-- Campo de Usuario (string) -->
+          <div>
+            <input
+              type="text"
+              formControlName="username"
+              placeholder="Nombre de usuario"
+              class="mt-1 block w-full border-none bg-gray-100 h-11 rounded-xl shadow-lg hover:bg-blue-100 focus:bg-blue-100 focus:ring-0"
+              [ngClass]="{
+                'is-invalid': loginForm.get('username')?.invalid && loginForm.get('username')?.touched
+              }"
+            />
+            <!-- Mensaje de error para el usuario -->
+            <div
+              *ngIf="loginForm.get('username')?.invalid && loginForm.get('username')?.touched"
+              class="invalid-feedback"
+            >
+              <div *ngIf="loginForm.get('username')?.errors?.['required']">
+                Nombre de usuario es requerido.
+              </div>
+            </div>
+          </div>
+
+          <!-- Campo de Contraseña -->
+          <div class="mt-7">
+            <input
+              type="password"
+              formControlName="password"
+              placeholder="Contraseña"
+              class="mt-1 block w-full border-none bg-gray-100 h-11 rounded-xl shadow-lg hover:bg-blue-100 focus:bg-blue-100 focus:ring-0"
+              [ngClass]="{
+                'is-invalid': loginForm.get('password')?.invalid && loginForm.get('password')?.touched
+              }"
+            />
+            <!-- Mensaje de error para la contraseña -->
+            <div
+              *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
+              class="invalid-feedback"
+            >
+              <div *ngIf="loginForm.get('password')?.errors?.['required']">
+                Contraseña es requerida.
+              </div>
+              <div *ngIf="loginForm.get('password')?.errors?.['minlength']">
+                La contraseña debe tener al menos 6 caracteres.
+              </div>
+            </div>
+          </div>
+
+          <!-- Recordar y Olvidar Contraseña -->
+          <div class="mt-7 flex">
+            <label for="remember_me" class="inline-flex items-center w-full cursor-pointer">
+              <input
+                id="remember_me"
+                type="checkbox"
+                class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                name="remember"
+              />
+              <span class="ml-2 text-sm text-gray-600"> Recuerdame </span>
+            </label>
+
+            <div class="w-full text-right">
+              <a class="underline text-sm text-gray-600 hover:text-gray-900" href="#">
+                ¿Olvidó su contraseña?
+              </a>
+            </div>
+          </div>
+
+          <!-- Botón de Login -->
+          <div class="mt-7">
+            <button
+              type="submit"
+              class="bg-blue-500 w-full py-3 rounded-xl text-white shadow-xl hover:shadow-inner focus:outline-none transition duration-500 ease-in-out transform hover:-translate-x hover:scale-105"
+              [disabled]="loginForm.invalid"
+            >
+              Login
+            </button>
+          </div>
+
+          <!-- Separador "Accede con" -->
+          <div class="flex mt-7 items-center text-center">
+            <hr class="border-gray-300 border-1 w-full rounded-md" />
+            <label class="block font-medium text-sm text-gray-600 w-full"> Accede con </label>
+            <hr class="border-gray-300 border-1 w-full rounded-md" />
+          </div>
+
+          <!-- Botones de Redes Sociales -->
+          <div class="flex mt-7 justify-center w-full">
+            <button
+              class="mr-5 bg-blue-500 border-none px-4 py-2 rounded-xl cursor-pointer text-white shadow-xl hover:shadow-inner transition duration-500 ease-in-out transform hover:-translate-x hover:scale-105"
+            >
+              Facebook
+            </button>
+
+            <button
+              class="bg-red-500 border-none px-4 py-2 rounded-xl cursor-pointer text-white shadow-xl hover:shadow-inner transition duration-500 ease-in-out transform hover:-translate-x hover:scale-105"
+            >
+              Google
+            </button>
+          </div>
+
+          <!-- Enlace de Registro -->
+          <div class="mt-7">
+            <div class="flex justify-center items-center">
+              <label class="mr-2">¿Eres nuevo?</label>
+              <a href="#" class="text-blue-500 transition duration-500 ease-in-out transform hover:-translate-x hover:scale-105">
+                Crea una cuenta
+              </a>
+            </div>
+          </div>
+        </form>
       </div>
     </div>
   </div>
+</div>
