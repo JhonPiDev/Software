@@ -18,30 +18,36 @@ export class LoginComponent {
   constructor(private fb: FormBuilder, private http: HttpClient, private router: Router) {
     this.loginForm = this.fb.group({
       username: ['', [Validators.required]], // Cambia 'email' a 'username'
-      password: ['', [Validators.required, Validators.minLength(6)]],
+      password: ['', [Validators.required, Validators.minLength(2)]],
     });
   }
 
   onSubmit() {
-    console.log('Botón de login clickeado'); // Log para verificar que el método se ejecuta
+    console.log('Botón de login clickeado');
   
     if (this.loginForm.invalid) {
-      console.log('Formulario inválido'); // Log si el formulario es inválido
+      console.log('Formulario inválido');
       return;
     }
   
     const { username, password } = this.loginForm.value;
-    console.log('Datos enviados:', { username, password }); // Log de los datos enviados
+    console.log('Datos enviados:', { username, password });
   
     this.http.post('http://localhost:3000/login', { username, password }).subscribe(
       (response: any) => {
-        console.log('Respuesta del backend:', response); // Log de la respuesta del backend
-        this.router.navigate(['/admin']);
+        console.log('Respuesta del backend:', response);
+        
+        if (response.role === 'admin') {
+          this.router.navigate(['/admin']); // Redirigir a admin
+        } else {
+          this.router.navigate(['/user']); // Redirigir a usuario normal
+        }
       },
       (error) => {
-        console.error('Error en la solicitud:', error); // Log de errores
+        console.error('Error en la solicitud:', error);
         this.errorMessage = 'Credenciales incorrectas. Inténtalo de nuevo.';
       }
     );
   }
+  
 }

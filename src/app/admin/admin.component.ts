@@ -11,25 +11,26 @@ import { Router } from '@angular/router';
   styleUrls: ['./admin.component.scss'],
 })
 export class AdminComponent {
-  isSideNavVisible = true;
+  isSideNavVisible: boolean = true; // Estado de visibilidad de la barra lateral
 
-  constructor(private router: Router) {}
-
+  // Método para alternar la visibilidad de la barra lateral
   toggleSideNav() {
     this.isSideNavVisible = !this.isSideNavVisible;
   }
 
+  // Método para cerrar sesión (puedes implementar la lógica necesaria)
+  logout() {
+    console.log('Sesión cerrada');
+    // Aquí puedes agregar la lógica para cerrar sesión
+  }
+
+  // Métodos para notificaciones y perfil (puedes implementar la lógica necesaria)
   showNotifications() {
-    alert('Notificaciones');
+    console.log('Mostrar notificaciones');
   }
 
   showProfile() {
-    alert('Perfil');
-  }
-
-  logout() {
-    alert('Cerrando sesión...');
-    this.router.navigate(['/login']);
+    console.log('Mostrar perfil');
   }
 }
 

@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { LoginComponent } from './login/login.component';
+import { UserComponent } from './user/user.component';
 import { AdminComponent } from './admin/admin.component';
 import { HomeComponent } from './admin/home/home.component';
 import { AuthComponent } from './admin/auth/auth.component';
@@ -9,7 +10,8 @@ import { TransactionsComponent } from './admin/transactions/transactions.compone
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' }, // Ruta por defecto
-  { path: 'login', component: LoginComponent }, // Ruta para el login
+  { path: 'login', component: LoginComponent },
+  { path: 'user', component: UserComponent }, // Ruta para la página de usuario // Ruta para el login
   {
     path: 'admin', // Ruta principal del panel de administración
     component: AdminComponent, // Componente principal
