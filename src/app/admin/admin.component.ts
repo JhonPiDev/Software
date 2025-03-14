@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
-import { Router } from '@angular/router';
+import { RouterModule, Router } from '@angular/router'; // Asegúrate de importar Router
 
 @Component({
   selector: 'app-admin',
@@ -13,15 +12,23 @@ import { Router } from '@angular/router';
 export class AdminComponent {
   isSideNavVisible: boolean = true; // Estado de visibilidad de la barra lateral
 
+  constructor(private router: Router) {} // Inyecta el Router en el constructor
+
   // Método para alternar la visibilidad de la barra lateral
   toggleSideNav() {
     this.isSideNavVisible = !this.isSideNavVisible;
   }
 
-  // Método para cerrar sesión (puedes implementar la lógica necesaria)
+  // Método para cerrar sesión
   logout() {
-    console.log('Sesión cerrada');
-    // Aquí puedes agregar la lógica para cerrar sesión
+    // Eliminar datos de sesión (por ejemplo, token o información del usuario)
+    localStorage.removeItem('token'); // Si usas localStorage para almacenar el token
+    localStorage.removeItem('user');  // Si almacenas información del usuario
+
+    // Redirigir al usuario a la página de login
+    this.router.navigate(['/login']);
+
+    console.log('Sesión cerrada'); // Opcional: Para verificar que el método se ejecuta
   }
 
   // Métodos para notificaciones y perfil (puedes implementar la lógica necesaria)
@@ -33,4 +40,3 @@ export class AdminComponent {
     console.log('Mostrar perfil');
   }
 }
-

@@ -1,6 +1,10 @@
 import { Routes } from '@angular/router';
 import { LoginComponent } from './login/login.component';
 import { UserComponent } from './user/user.component';
+import { RegistroPruebasComponent } from './user/registro-pruebas/registro-pruebas.component';
+import { HistorialPruebasComponent } from './user/historial-pruebas/historial-pruebas.component'; 
+import { ExportacionInformesComponent } from './user/exportacion-informes/exportacion-informes.component';
+import { NotificacionesComponent } from './user/notificaciones/notificaciones.component';
 import { AdminComponent } from './admin/admin.component';
 import { HomeComponent } from './admin/home/home.component';
 import { AuthComponent } from './admin/auth/auth.component';
@@ -10,8 +14,18 @@ import { TransactionsComponent } from './admin/transactions/transactions.compone
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' }, // Ruta por defecto
-  { path: 'login', component: LoginComponent },
-  { path: 'user', component: UserComponent }, // Ruta para la página de usuario // Ruta para el login
+  { path: 'login', component: LoginComponent }, 
+  {
+    path: 'user',// Ruta para la página de usuario // Ruta para el login
+    component: UserComponent,
+    children: [
+      { path: 'registro-pruebas', component: RegistroPruebasComponent },
+      { path: 'historial-pruebas', component: HistorialPruebasComponent },
+      { path: 'exportacion-informes', component: ExportacionInformesComponent },
+      { path: 'notificaciones', component: NotificacionesComponent },
+      { path: '', redirectTo: 'registro-pruebas', pathMatch: 'full' }, // Ruta por defecto
+    ],
+  },
   {
     path: 'admin', // Ruta principal del panel de administración
     component: AdminComponent, // Componente principal
