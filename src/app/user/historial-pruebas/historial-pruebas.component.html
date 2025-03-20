@@ -18,21 +18,31 @@
     <p><strong>Fecha de Prueba:</strong> {{ registro.fecha_prueba }}</p>
     <p><strong>Estado:</strong> {{ registro.estado_prueba }}</p>
     
+    <!-- Mostrar imagen si existe -->
+    <img *ngIf="registro.imagen_base64" 
+     [src]="getImageUrl(registro.imagen_base64)" 
+     alt="Imagen de prueba"
+     class="w-32 h-24 object-cover rounded-lg mt-2 shadow-md">
+
+      
+
+
     <!-- Botones de Acción -->
     <div class="mt-3 flex space-x-2">
       <button (click)="editarRegistro(registro)" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-300">Editar</button>
       <button (click)="eliminarRegistro(registro.id)" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition duration-300">Eliminar</button>
       <!-- Botón para exportar el registro individual -->
-  <button (click)="exportarRegistroPDF(registro)" class="px-3 py-1 bg-green-500 text-white rounded-lg">
-    📄 Exportar este Registro
-  </button>
+      <button (click)="exportarRegistroPDF(registro)" class="px-3 py-1 bg-green-500 text-white rounded-lg">
+        📄 Exportar este Registro
+      </button>
     </div>
   </div>
+
   <button (click)="exportarPDF()" class="px-4 py-2 bg-blue-500 text-white rounded-lg mt-3">
   📄 Exportar a PDF
 </button>
-</div>
 
+</div>
 
 <!-- Formulario de Edición (Modal) -->
 <div *ngIf="mostrarFormularioEdicion" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">

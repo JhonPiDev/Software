@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import Swal from 'sweetalert2';
 import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable'; // Importa SweetAlert2
+import autoTable from 'jspdf-autotable';
 
 @Component({
   selector: 'app-historial-pruebas',
@@ -14,29 +14,32 @@ import autoTable from 'jspdf-autotable'; // Importa SweetAlert2
   styleUrl: './historial-pruebas.component.scss'
 })
 export class HistorialPruebasComponent implements OnInit {
-  registros: any[] = []; // Lista de registros obtenidos de la base de datos
-  registrosFiltrados: any[] = []; // Lista de registros filtrados
-  filtro: string = ''; // Texto de filtro
-  registroEditando: any = null; // Registro que se está editando
-  mostrarFormularioEdicion: boolean = false; // Controla la visibilidad del formulario de edición
+  registros: any[] = [];
+  registrosFiltrados: any[] = [];
+  filtro: string = '';
+  registroEditando: any = null;
+  mostrarFormularioEdicion: boolean = false;
 
   constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
     this.cargarRegistros();
   }
-
+  getImageUrl(base64String: string): string {
+    return `data:image/png;base64,${base64String}`;
+  }
+  
   // Cargar registros desde el backend
   cargarRegistros() {
     this.http.get('http://localhost:3000/registros').subscribe(
       (data: any) => {
         this.registros = data;
-        this.registrosFiltrados = data; // Inicialmente, muestra todos los registros
+        this.registrosFiltrados = data;
       },
       (error) => console.error('Error al cargar registros', error)
     );
   }
-  
+
   // Filtrar registros por material o producto
   filtrarRegistros() {
     const filtroLower = this.filtro.toLowerCase();
@@ -46,135 +49,113 @@ export class HistorialPruebasComponent implements OnInit {
     );
   }
 
-  // Método para abrir el formulario de edición
+  // Editar registro
   editarRegistro(registro: any) {
-    this.registroEditando = { ...registro }; // Copia el registro para editarlo
-    this.mostrarFormularioEdicion = true; // Muestra el formulario de edición
+    this.registroEditando = { ...registro };
+    this.mostrarFormularioEdicion = true;
   }
 
-  // Método para guardar los cambios
+  // Guardar cambios en el registro
   guardarEdicion() {
-    // Validar que los campos no estén vacíos
-    if (
-      !this.registroEditando.material ||
-      !this.registroEditando.producto ||
-      !this.registroEditando.fecha_prueba ||
-      !this.registroEditando.estado_prueba
-    ) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Todos los campos son obligatorios',
-      });
-      return; // Detener la ejecución si hay campos vacíos
+    if (!this.registroEditando.material || !this.registroEditando.producto || !this.registroEditando.fecha_prueba || !this.registroEditando.estado_prueba) {
+      Swal.fire({ icon: 'error', title: 'Error', text: 'Todos los campos son obligatorios' });
+      return;
     }
 
-    // Enviar los cambios al backend
     this.http.put(`http://localhost:3000/registros/${this.registroEditando.id}`, this.registroEditando).subscribe(
       () => {
-        // Mostrar modal de éxito
-        Swal.fire({
-          icon: 'success',
-          title: 'Actualizado',
-          text: 'El registro se ha actualizado correctamente',
-          timer: 2000, // Cierra automáticamente después de 2 segundos
-          showConfirmButton: false,
-        });
-
-        this.mostrarFormularioEdicion = false; // Oculta el formulario de edición
-        this.cargarRegistros(); // Recarga la lista de registros
+        Swal.fire({ icon: 'success', title: 'Actualizado', text: 'El registro se ha actualizado correctamente', timer: 2000, showConfirmButton: false });
+        this.mostrarFormularioEdicion = false;
+        this.cargarRegistros();
       },
-      (error) => {
-        console.error('Error al actualizar registro:', error);
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'No se pudo actualizar el registro',
-        });
-      }
+      (error) => Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo actualizar el registro' })
     );
   }
 
-  // Método para cancelar la edición
+  // Cancelar edición
   cancelarEdicion() {
-    this.mostrarFormularioEdicion = false; // Oculta el formulario de edición
-    this.registroEditando = null; // Limpia el registro en edición
+    this.mostrarFormularioEdicion = false;
+    this.registroEditando = null;
   }
 
-  // Método para eliminar un registro
+  // Eliminar registro
   eliminarRegistro(id: number) {
-    if (confirm('¿Estás seguro de eliminar este registro?')) {
-      this.http.delete(`http://localhost:3000/registros/${id}`).subscribe(
-        () => {
-          // Elimina el registro de la lista local
-          this.registros = this.registros.filter(r => r.id !== id);
-          this.registrosFiltrados = this.registrosFiltrados.filter(r => r.id !== id); // Actualiza la lista filtrada
-          console.log('Registro eliminado correctamente');
-        },
-        (error) => {
-          console.error('Error al eliminar registro:', error);
-        }
-      );
-    }
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: 'No podrás revertir esto',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.http.delete(`http://localhost:3000/registros/${id}`).subscribe(
+          () => {
+            this.registros = this.registros.filter(r => r.id !== id);
+            this.registrosFiltrados = this.registrosFiltrados.filter(r => r.id !== id);
+            Swal.fire({ icon: 'success', title: 'Eliminado', text: 'El registro se ha eliminado correctamente' });
+          },
+          (error) => Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo eliminar el registro' })
+        );
+      }
+    });
   }
 
-  // Método para exportar a PDF
+  // Exportar todos los registros a PDF
   exportarPDF() {
-      const doc = new jsPDF();
-      
-      // ** Encabezado **
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(16);
-      doc.text('Empresa de Servicios para Islas de Gasolinerías', 15, 15);
-      doc.setFontSize(12);
-      doc.text('Informe de Pruebas Hidrostáticas', 15, 25);
-      doc.text(`Fecha de generación: ${new Date().toLocaleDateString()}`, 15, 35);
-  
-      // ** Datos de la tabla **
-      const columnas = ['ID', 'Material', 'Producto', 'Fecha de Prueba', 'Estado de Prueba'];
-      const filas = this.registrosFiltrados.map(registro => [
-        registro.id,
-        registro.material,
-        registro.producto,
-        registro.fecha_prueba,
-        registro.estado_prueba
-      ]);
-  
-      autoTable(doc, {
-        startY: 45,
-        head: [columnas],
-        body: filas,
-        theme: 'striped',
-        styles: { fontSize: 10 },
-        headStyles: { fillColor: [0, 100, 200] }
-      });
-  
-      // ** Guardar el archivo **
-      doc.save('Informe_Pruebas_Hidrostáticas.pdf');
-  }
-  
-  exportarRegistroPDF(registro: any) {
     const doc = new jsPDF();
-  
-    // ** Encabezado **
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(16);
     doc.text('Empresa de Servicios para Islas de Gasolinerías', 15, 15);
     doc.setFontSize(12);
-    doc.text('Informe de Prueba Hidrostática', 15, 25);
+    doc.text('Informe de Pruebas Hidrostáticas', 15, 25);
     doc.text(`Fecha de generación: ${new Date().toLocaleDateString()}`, 15, 35);
-  
-    // ** Datos del Registro **
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'normal');
-    doc.text(`ID: ${registro.id}`, 15, 50);
-    doc.text(`Material: ${registro.material}`, 15, 60);
-    doc.text(`Producto: ${registro.producto}`, 15, 70);
-    doc.text(`Fecha de Prueba: ${registro.fecha_prueba}`, 15, 80);
-    doc.text(`Estado de Prueba: ${registro.estado_prueba}`, 15, 90);
-  
-    // ** Guardar el archivo **
-    doc.save(`Prueba_${registro.id}.pdf`);
+
+    const columnas = ['ID', 'Material', 'Producto', 'Fecha de Prueba', 'Estado'];
+    const filas = this.registrosFiltrados.map(r => [r.id, r.material, r.producto, r.fecha_prueba, r.estado_prueba]);
+
+    autoTable(doc, {
+      startY: 45,
+      head: [columnas],
+      body: filas,
+      theme: 'striped',
+      styles: { fontSize: 10 },
+      headStyles: { fillColor: [0, 100, 200] }
+    });
+
+    doc.save('Informe_Pruebas_Hidrostáticas.pdf');
   }
+
+  // Exportar un solo registro con imagen a PDF
+  exportarRegistroPDF(registro: any) {
+    const doc = new jsPDF();
   
+    // Título del documento
+    doc.setFontSize(18);
+    doc.text('Registro de Prueba Hidrostática', 20, 20);
+  
+    // Información del registro
+    doc.setFontSize(12);
+    doc.text(`ID: ${registro.id}`, 20, 40);
+    doc.text(`Material: ${registro.material}`, 20, 50);
+    doc.text(`Producto: ${registro.producto}`, 20, 60);
+    doc.text(`Fecha de Prueba: ${registro.fecha_prueba}`, 20, 70);
+    doc.text(`Estado: ${registro.estado_prueba}`, 20, 80);
+  
+    // Observaciones (manejo de texto largo)
+    doc.text('Observaciones:', 20, 90);
+    const observaciones = doc.splitTextToSize(registro.observaciones || 'Ninguna', 160);
+    doc.text(observaciones, 20, 100);
+  
+    // Insertar imagen si existe
+    if (registro.imagen_base64) {
+      const imgData = `data:image/png;base64,${registro.imagen_base64}`;
+      doc.addImage(imgData, 'PNG', 20, 120, 100, 80); // Posición X, Y, Ancho, Alto
+    } else {
+      doc.text('Sin imagen adjunta', 20, 130);
+    }
+  
+    // Guardar PDF con nombre personalizado
+    doc.save(`Registro_${registro.id}.pdf`);
+  }
 }

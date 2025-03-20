@@ -1,0 +1,60 @@
+<div class="bg-white shadow-lg rounded-lg p-6 max-w-3xl mx-auto">
+    <h1 class="text-2xl font-semibold text-gray-800 mb-4 text-center">Análisis de Trabajo Seguro (ATS)</h1>
+  
+    <form [formGroup]="ATSForm" (ngSubmit)="enviarFormulario()" class="space-y-4">
+      
+      <!-- Lugar -->
+      <div>
+        <label class="font-medium text-gray-700">Lugar:</label>
+        <input type="text" formControlName="lugar"
+          class="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-cyan-300">
+      </div>
+  
+      <!-- Fecha -->
+      <div>
+        <label class="font-medium text-gray-700">Fecha:</label>
+        <input type="date" formControlName="fecha"
+          class="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-cyan-300">
+      </div>
+  
+      <!-- Procedimiento -->
+      <div>
+        <label class="font-medium text-gray-700">Procedimiento:</label>
+        <textarea formControlName="procedimiento"
+          class="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-cyan-300"></textarea>
+      </div>
+  
+      <!-- Nivel de Riesgo -->
+      <div>
+        <label class="font-medium text-gray-700">Nivel de Riesgo:</label>
+        <div class="grid grid-cols-2 gap-2 mt-2">
+          <label class="flex items-center space-x-2"><input type="checkbox" formControlName="nivelRuido" class="accent-cyan-500"> <span>Nivel de Ruido</span></label>
+          <label class="flex items-center space-x-2"><input type="checkbox" formControlName="materialFilo" class="accent-cyan-500"> <span>Material con filo</span></label>
+          <label class="flex items-center space-x-2"><input type="checkbox" formControlName="quimicos" class="accent-cyan-500"> <span>Químicos</span></label>
+          <label class="flex items-center space-x-2"><input type="checkbox" formControlName="iluminacion" class="accent-cyan-500"> <span>Iluminación</span></label>
+          <label class="flex items-center space-x-2"><input type="checkbox" formControlName="ventilacion" class="accent-cyan-500"> <span>Ventilación</span></label>
+          <label class="flex items-center space-x-2"><input type="checkbox" formControlName="caidas" class="accent-cyan-500"> <span>Caídas</span></label>
+        </div>
+      </div>
+  
+      <!-- Equipos de Protección Personal -->
+      <div>
+        <label class="font-medium text-gray-700">Equipos de Protección Personal:</label>
+        <div class="grid grid-cols-2 gap-2 mt-2">
+          <label class="flex items-center space-x-2"><input type="checkbox" formControlName="gafasSeguridad" class="accent-cyan-500"> <span>Gafas de Seguridad</span></label>
+          <label class="flex items-center space-x-2"><input type="checkbox" formControlName="arnes" class="accent-cyan-500"> <span>Arnés</span></label>
+          <label class="flex items-center space-x-2"><input type="checkbox" formControlName="guantes" class="accent-cyan-500"> <span>Guantes</span></label>
+          <label class="flex items-center space-x-2"><input type="checkbox" formControlName="casco" class="accent-cyan-500"> <span>Casco</span></label>
+        </div>
+      </div>
+  
+      <!-- Botón de Enviar -->
+      <div class="text-center">
+        <button type="submit"
+          class="px-6 py-2 bg-cyan-600 text-white font-semibold rounded-lg hover:bg-cyan-700 transition duration-200">
+          Guardar ATS
+        </button>
+      </div>
+    </form>
+  </div>
+  

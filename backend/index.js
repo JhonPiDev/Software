@@ -2,10 +2,15 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const mysql = require('mysql2');
 const cors = require('cors');
+const router = express.Router();
+const multer = require('multer');
+
  // Asegúrate de instalar bcrypt con npm install bcrypt
 
 const app = express();
 const port = 3000;
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
 // Configura CORS para permitir solicitudes desde Angular
 app.use(cors());
@@ -30,38 +35,33 @@ db.connect((err) => {
   console.log('✅ Conectado a MySQL');
 });
 
-/** 🔹 RUTA PARA OBTENER EL HISTORIAL DE PRUEBAS */
 // Ruta para registrar información técnica
-app.post('/registros-tecnicos', (req, res) => {
-  console.log('📩 Datos recibidos en el backend:', req.body);
+app.post('/registros_tecnicos', upload.single('imagen'), (req, res) => {
+  console.log('📩 Datos recibidos:', req.body);
+  console.log('📸 Imagen recibida:', req.file);
 
   const {
-    material,
-    tipoTanque,
-    capacidad,
-    anioFabricacion,
-    producto,
-    presion,
-    temperatura,
-    fechaPrueba,
-    horaPrueba,
-    estadoPrueba,
-    observaciones
+    material, tipoTanque, capacidad, anioFabricacion, producto,
+    presion, temperatura, fechaPrueba, horaPrueba, estadoPrueba, observaciones
   } = req.body;
 
-  // Verificación de datos
-  if (!material || !tipoTanque || !capacidad || !anioFabricacion || !producto || !presion || !temperatura || !fechaPrueba || !horaPrueba || !estadoPrueba) {
+  if (!material || !tipoTanque || !capacidad || !anioFabricacion || !producto ||
+      !presion || !temperatura || !fechaPrueba || !horaPrueba || !estadoPrueba) {
     return res.status(400).json({ message: 'Todos los campos son obligatorios.' });
   }
 
-  // Query con nombres de columna corregidos
+  const imagenBuffer = req.file ? req.file.buffer : null; // Convertir la imagen a binario
+
   const sql = `
     INSERT INTO registros_tecnicos 
-    (material, tipo_tanque, capacidad, anio_fabricacion, producto, presion, temperatura, fecha_prueba, hora_prueba, estado_prueba, observaciones) 
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `;
+    (material, tipo_tanque, capacidad, anio_fabricacion, producto, presion, 
+    temperatura, fecha_prueba, hora_prueba, estado_prueba, observaciones, imagenes_base64) 
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
-  const values = [material, tipoTanque, capacidad, anioFabricacion, producto, presion, temperatura, fechaPrueba, horaPrueba, estadoPrueba, observaciones];
+  const values = [
+    material, tipoTanque, capacidad, anioFabricacion, producto, presion,
+    temperatura, fechaPrueba, horaPrueba, estadoPrueba, observaciones, imagenBuffer
+  ];
 
   db.query(sql, values, (err, result) => {
     if (err) {
@@ -69,7 +69,7 @@ app.post('/registros-tecnicos', (req, res) => {
       return res.status(500).json({ message: 'Error al guardar en la base de datos.' });
     }
     console.log('✅ Registro guardado con éxito:', result);
-    res.status(201).json({ message: 'Registro de prueba guardado correctamente.', id: result.insertId });
+    res.status(201).json({ message: 'Registro guardado correctamente.', id: result.insertId });
   });
 });
 
@@ -155,17 +155,27 @@ app.post('/login', (req, res) => {
     }
   });
 });
+
 // Ruta para enlistar un registro técnico
 app.get('/registros', (req, res) => {
-  const query = 'SELECT id, material, producto, fecha_prueba, estado_prueba FROM registros_tecnicos';
+  const query = `
+    SELECT id, material, tipo_tanque, capacidad, anio_fabricacion, 
+           producto, presion, temperatura, fecha_prueba, hora_prueba, 
+           estado_prueba, observaciones, 
+           TO_BASE64(imagenes_base64) AS imagen_base64 
+    FROM registros_tecnicos`;
+
   db.query(query, (err, results) => {
     if (err) {
       console.error('Error al obtener historial:', err);
       return res.status(500).json({ message: 'Error al obtener historial' });
     }
+
     res.json(results);
   });
 });
+
+
 // Ruta para eliminar un registro técnico
 app.delete('/registros/:id', (req, res) => {
   const registroId = req.params.id;
@@ -187,6 +197,7 @@ app.delete('/registros/:id', (req, res) => {
     res.json({ message: 'Registro eliminado correctamente' });
   });
 });
+
 // ** Ruta para las listas **
 app.get('/users', (req, res) => {
   const query = 'SELECT id, username, role FROM users'; // Selecciona solo los campos necesarios
@@ -215,7 +226,110 @@ app.delete('/users/:id', (req, res) => {
   });
 });
 
+
+// Obtener todos los equipos con validación de datos
+app.get('/equipos', (req, res) => {
+  const sql = `
+    SELECT 
+      id, 
+      material, 
+      tipo_tanque AS tipoTanque, 
+      capacidad, 
+      anio_fabricacion AS anioFabricacion, 
+      producto, 
+      DATE_FORMAT(fecha_registro, '%Y-%m-%d %H:%i:%s') AS fechaRegistro 
+    FROM equipos 
+    ORDER BY fecha_registro DESC`;
+
+  db.query(sql, (err, result) => {
+    if (err) {
+      console.error('Error al obtener los equipos:', err);
+      return res.status(500).json({ error: 'Error al obtener los equipos' });
+    }
+
+    if (result.length === 0) {
+      return res.status(404).json({ message: 'No hay equipos registrados' });
+    }
+
+    res.json(result);
+  });
+});
+
+
+// Insertar un nuevo equipo
+app.post('/equipos', (req, res) => {
+  const { material, tipoTanque, capacidad, anioFabricacion, producto } = req.body;
+  const sql = "INSERT INTO equipos (material, tipo_tanque, capacidad, anio_fabricacion, producto) VALUES (?, ?, ?, ?, ?)";
+  db.query(sql, [material, tipoTanque, capacidad, anioFabricacion, producto], (err, result) => {
+      if (err) return res.status(500).send(err);
+      res.json({ message: 'Equipo registrado', id: result.insertId });
+  });
+});
+
+// Eliminar un equipo
+app.delete('/equipos/:id', (req, res) => {
+  const { id } = req.params;
+  const sql = "DELETE FROM equipos WHERE id = ?";
+  db.query(sql, [id], (err, result) => {
+      if (err) return res.status(500).send(err);
+      res.json({ message: 'Equipo eliminado' });
+  });
+});
+
+// *ruta para obtener los ats*
+app.post('/api/ats', (req, res) => {
+  console.log('Solicitud recibida en /api/ats:', req.body);
+  const {
+    lugar,
+    fecha,
+    procedimiento,
+    nivelRuido,
+    materialFilo,
+    quimicos,
+    iluminacion,
+    ventilacion,
+    caidas,
+    gafasSeguridad,
+    arnes,
+    guantes,
+    casco,
+    observacion
+  } = req.body;
+
+  const query = `
+    INSERT INTO ats (
+      lugar, fecha, procedimiento, nivelRuido, materialFilo, quimicos, iluminacion, ventilacion, caidas, gafasSeguridad, arnes, guantes, casco, observacion
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `;
+
+  const values = [
+    lugar,
+    fecha,
+    procedimiento,
+    nivelRuido,
+    materialFilo,
+    quimicos,
+    iluminacion,
+    ventilacion,
+    caidas,
+    gafasSeguridad,
+    arnes,
+    guantes,
+    casco,
+    observacion
+  ];
+
+  db.query(query, values, (err, result) => {
+    if (err) {
+      console.error('Error al guardar el ATS:', err);
+      return res.status(500).json({ message: 'Error al guardar el ATS' });
+    }
+    res.status(201).json({ message: 'ATS guardado correctamente', id: result.insertId });
+  });
+});
+
 // Inicia el servidor
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
+

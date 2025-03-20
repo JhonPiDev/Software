@@ -4,7 +4,9 @@
     <div class="flex items-center">
       <!-- Logo y nombre de la aplicación -->
       <div class="hidden md:flex items-center">
-        <img src="https://www.emprenderconactitud.com/img/POC%20WCS%20(1).png" alt="Logo" class="w-28 h-18 mr-2" />
+        <img src="icon.jpg" alt="Logo" class="w-28 h-18 mr-2" />
+
+
         <h2 class="font-bold text-xl text-gray-800">Nombre de la Aplicación</h2>
       </div>
 
@@ -52,6 +54,13 @@
         </a>
         <a
           class="block text-gray-500 py-2.5 px-4 my-4 rounded transition duration-200 hover:bg-gradient-to-r hover:from-cyan-400 hover:to-cyan-300 hover:text-white"
+          routerLink="/admin/team"
+          routerLinkActive="bg-gradient-to-r from-cyan-400 to-cyan-300 text-white"
+        >
+          <i class="fas fa-file-alt mr-2"></i>Equipos
+        </a>
+        <a
+          class="block text-gray-500 py-2.5 px-4 my-4 rounded transition duration-200 hover:bg-gradient-to-r hover:from-cyan-400 hover:to-cyan-300 hover:text-white"
           routerLink="/admin/users"
           routerLinkActive="bg-gradient-to-r from-cyan-400 to-cyan-300 text-white"
         >
@@ -64,13 +73,7 @@
         >
           <i class="fas fa-store mr-2"></i>Comercios
         </a>
-        <a
-          class="block text-gray-500 py-2.5 px-4 my-4 rounded transition duration-200 hover:bg-gradient-to-r hover:from-cyan-400 hover:to-cyan-300 hover:text-white"
-          routerLink="/admin/transactions"
-          routerLinkActive="bg-gradient-to-r from-cyan-400 to-cyan-300 text-white"
-        >
-          <i class="fas fa-exchange-alt mr-2"></i>Transacciones
-        </a>
+        
       </nav>
 
       <!-- Cerrar Sesión -->

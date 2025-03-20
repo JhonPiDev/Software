@@ -1,0 +1,100 @@
+<div class="max-w-5xl mx-auto mt-8">
+    <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">
+        Gestión de Equipos Técnicos
+    </h1>
+    <p class="text-center text-gray-600 mb-6">
+        Administra los equipos técnicos almacenados en la base de datos.
+    </p>
+
+    <!-- Botón para abrir el modal de nuevo equipo -->
+    <div class="text-center">
+        <button class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg shadow-md transition duration-300"
+            (click)="toggleModal()">
+            + Ingresar Nuevo Equipo
+        </button>
+    </div>
+
+    <!-- Modal -->
+    <div *ngIf="isModalOpen" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center z-50">
+        <div class="bg-white p-6 rounded-lg shadow-xl w-[40rem] transform transition-all scale-95">
+            <h2 class="text-2xl font-bold text-center text-gray-800 mb-4">
+                {{ editando ? 'Editar Información Técnica' : 'Registro de Información Técnica' }}
+            </h2>
+
+            <form (submit)="guardarEquipo()">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-gray-700 font-medium">Material:</label>
+                        <input type="text"
+                            class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
+                            [(ngModel)]="nuevoEquipo.material" name="material" required>
+                    </div>
+
+                    <div>
+                        <label class="block text-gray-700 font-medium">Tipo de Tanque:</label>
+                        <input type="text"
+                            class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
+                            [(ngModel)]="nuevoEquipo.tipoTanque" name="tipoTanque" required>
+                    </div>
+
+                    <div>
+                        <label class="block text-gray-700 font-medium">Capacidad en Galones:</label>
+                        <input type="number"
+                            class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
+                            [(ngModel)]="nuevoEquipo.capacidad" name="capacidad" required>
+                    </div>
+
+                    <div>
+                        <label class="block text-gray-700 font-medium">Año de Fabricación:</label>
+                        <input type="number"
+                            class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
+                            [(ngModel)]="nuevoEquipo.anioFabricacion" name="anioFabricacion" required>
+                    </div>
+
+                    <div class="col-span-2">
+                        <label class="block text-gray-700 font-medium">Producto:</label>
+                        <input type="text"
+                          class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
+                          [(ngModel)]="nuevoEquipo.producto" name="producto" required>
+                      </div>
+                      
+                </div>
+
+                <div class="flex justify-between mt-6">
+                    <button type="submit"
+                        class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg shadow-md transition duration-300">
+                        {{ editando ? 'Actualizar' : 'Guardar' }} Equipo
+                    </button>
+                    <button type="button"
+                        class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg shadow-md transition duration-300"
+                        (click)="toggleModal()">
+                        Cerrar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Sección de tarjetas -->
+    <div class="mt-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div *ngFor="let equipo of equipos"
+            class="bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg transition duration-300">
+            <h3 class="text-lg font-bold text-gray-800">{{ equipo.material }} - {{ equipo.tipoTanque }}</h3>
+            <p class="text-gray-600"><strong>Capacidad:</strong> {{ equipo.capacidad }} galones</p>
+            <p class="text-gray-600"><strong>Año de Fabricación:</strong> {{ equipo.anioFabricacion }}</p>
+            <p class="text-gray-600"><strong>Producto:</strong> {{ equipo.producto }}</p>
+
+            <!-- Botones de editar y eliminar -->
+            <div class="flex justify-between mt-4">
+                <button class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg shadow-md transition duration-300"
+                    (click)="editarEquipo(equipo)">
+                    Editar
+                </button>
+                <button class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg shadow-md transition duration-300"
+                    (click)="eliminarEquipo(equipo.id)">
+                    Eliminar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

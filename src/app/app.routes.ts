@@ -5,12 +5,13 @@ import { RegistroPruebasComponent } from './user/registro-pruebas/registro-prueb
 import { HistorialPruebasComponent } from './user/historial-pruebas/historial-pruebas.component'; 
 import { ExportacionInformesComponent } from './user/exportacion-informes/exportacion-informes.component';
 import { NotificacionesComponent } from './user/notificaciones/notificaciones.component';
+import { ATSComponent } from './user/ats/ats.component';
 import { AdminComponent } from './admin/admin.component';
 import { HomeComponent } from './admin/home/home.component';
 import { AuthComponent } from './admin/auth/auth.component';
 import { UsersComponent } from './admin/users/users.component';
 import { CommercesComponent } from './admin/commerces/commerces.component';
-import { TransactionsComponent } from './admin/transactions/transactions.component';
+import { TeamComponent } from './admin/team/team.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' }, // Ruta por defecto
@@ -23,6 +24,7 @@ export const routes: Routes = [
       { path: 'historial-pruebas', component: HistorialPruebasComponent },
       { path: 'exportacion-informes', component: ExportacionInformesComponent },
       { path: 'notificaciones', component: NotificacionesComponent },
+      { path: 'ats', component: ATSComponent },
       { path: '', redirectTo: 'registro-pruebas', pathMatch: 'full' }, // Ruta por defecto
     ],
   },
@@ -34,7 +36,7 @@ export const routes: Routes = [
       { path: 'auth', component: AuthComponent }, // Ruta para Autorizaciones
       { path: 'users', component: UsersComponent }, // Ruta para Usuarios
       { path: 'commerces', component: CommercesComponent }, // Ruta para Comercios
-      { path: 'transactions', component: TransactionsComponent }, // Ruta para Transacciones
+      { path: 'team', component: TeamComponent }, // Ruta para Transacciones
       { path: '', redirectTo: 'home', pathMatch: 'full' }, // Ruta por defecto dentro de admin
     ],
   },
