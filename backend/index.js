@@ -124,6 +124,61 @@ app.post('/register', async (req, res) => {
   }
 });
 
+// ** Ruta para registrar un cliente **
+app.post('/agregar', async (req, res) => {
+  const { nit, razonSocial, direccion, telefono, establecimiento } = req.body;
+
+  if (!nit || !razonSocial || !direccion || !telefono || !establecimiento) {
+    return res.status(400).json({ message: 'Todos los campos son obligatorios' });
+  }
+
+  try {
+    // Insertar el cliente en la base de datos
+    const query = 'INSERT INTO usuario (nit, razon_social, direccion, telefono, establecimiento) VALUES (?, ?, ?, ?, ?)';
+    db.query(query, [nit, razonSocial, direccion, telefono, establecimiento], (err, result) => {
+      if (err) {
+        console.error('Error al registrar el cliente:', err);
+        return res.status(500).json({ message: 'Error al registrar el cliente' });
+      }
+      res.status(201).json({ message: 'Cliente registrado correctamente' });
+    });
+  } catch (error) {
+    console.error('Error en el servidor:', error);
+    res.status(500).json({ message: 'Error interno del servidor' });
+  }
+});
+
+// ** Ruta para obtener la lista de clientes **
+app.get('/cliente', (req, res) => {
+  const query = 'SELECT nit, razon_social, direccion, telefono, establecimiento FROM usuario'; // Solo selecciona los campos necesarios
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error('Error al obtener clientes:', err);
+      return res.status(500).json({ message: 'Error al obtener clientes' });
+    }
+    // Devolvemos un 200 con un array vacío si no hay resultados
+    res.status(200).json(results.length === 0 ? [] : results);
+  });
+});
+// ** Ruta para eliminar un cliente **
+app.delete('/cliente/:nit', (req, res) => {
+  const clienteId = req.params.nit;
+  console.log('ID recibido en el backend para eliminar:', clienteId); // 👀 Verifica el ID en consola
+
+  const query = 'DELETE FROM usuario WHERE nit = ?';
+  db.query(query, [clienteId], (err, result) => {
+    if (err) {
+      console.error('Error al eliminar cliente:', err);
+      return res.status(500).json({ message: 'Error al eliminar cliente' });
+    }
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Cliente no encontrado' });
+    }
+    res.json({ message: 'Cliente eliminado correctamente' });
+  });
+});
+
+
 // Ruta para manejar el login
 app.post('/login', (req, res) => {
   const { username, password } = req.body;
@@ -147,14 +202,17 @@ app.post('/login', (req, res) => {
       return res.status(401).json({ message: 'Contraseña incorrecta' });
     }
 
-    // Verificar el rol del usuario
+    // Verificar el rol del usuario y responder según corresponda
     if (user.role === 'admin') {
       return res.status(200).json({ message: 'Login exitoso', role: 'admin' });
+    } else if (user.role === 'inspector') {
+      return res.status(200).json({ message: 'Login exitoso', role: 'inspector' });
     } else {
       return res.status(200).json({ message: 'Login exitoso', role: 'user' });
     }
   });
 });
+
 
 // Ruta para enlistar un registro técnico
 app.get('/registros', (req, res) => {
@@ -247,11 +305,8 @@ app.get('/equipos', (req, res) => {
       return res.status(500).json({ error: 'Error al obtener los equipos' });
     }
 
-    if (result.length === 0) {
-      return res.status(404).json({ message: 'No hay equipos registrados' });
-    }
-
-    res.json(result);
+    // Devolvemos un 200 con un array vacío si no hay equipos
+    res.status(200).json(result.length === 0 ? [] : result);
   });
 });
 
@@ -276,7 +331,7 @@ app.delete('/equipos/:id', (req, res) => {
   });
 });
 
-// *ruta para obtener los ats*
+// *ruta para ingresar los ats*
 app.post('/api/ats', (req, res) => {
   console.log('Solicitud recibida en /api/ats:', req.body);
   const {
@@ -292,14 +347,13 @@ app.post('/api/ats', (req, res) => {
     gafasSeguridad,
     arnes,
     guantes,
-    casco,
-    observacion
+    casco
   } = req.body;
 
   const query = `
     INSERT INTO ats (
-      lugar, fecha, procedimiento, nivelRuido, materialFilo, quimicos, iluminacion, ventilacion, caidas, gafasSeguridad, arnes, guantes, casco, observacion
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      lugar, fecha, procedimiento, nivel_ruido, material_filo, quimicos, iluminacion, ventilacion, caidas, gafas_seguridad, arnes, guantes, casco
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
   const values = [
@@ -315,8 +369,7 @@ app.post('/api/ats', (req, res) => {
     gafasSeguridad,
     arnes,
     guantes,
-    casco,
-    observacion
+    casco
   ];
 
   db.query(query, values, (err, result) => {
@@ -328,8 +381,24 @@ app.post('/api/ats', (req, res) => {
   });
 });
 
+// * Ruta para obtener el historial ATS *
+app.get('/api/historial', (req, res) => {
+  const query = `
+    SELECT id, lugar, fecha, procedimiento, nivel_ruido, material_filo, quimicos, iluminacion, ventilacion, caidas, gafas_seguridad, arnes, guantes, casco 
+    FROM ats
+  `;
+
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error('Error al obtener los ATS:', err);
+      return res.status(500).json({ message: 'Error al obtener los ATS' });
+    }
+    res.json(results);
+  });
+});
+
+
 // Inicia el servidor
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
-

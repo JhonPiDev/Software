@@ -1,56 +1,57 @@
 import { Component } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { ReactiveFormsModule,FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-ats',
   standalone: true, // Indica que es un componente independiente
-  imports: [ReactiveFormsModule], // Importa el módulo de formularios reactivos
+  imports: [ReactiveFormsModule,CommonModule], // Importa el módulo de formularios reactivos
   templateUrl: './ats.component.html',
   styleUrls: ['./ats.component.scss'] 
 })
 export class ATSComponent {
-  // Definimos el formulario reactivo
   ATSForm: FormGroup;
+  showModal: boolean = false; // Variable para controlar el modal
 
   constructor(private fb: FormBuilder, private http: HttpClient) {
-    // Inicializamos el formulario en el constructor
     this.ATSForm = this.fb.group({
-      lugar: ['', Validators.required], // Campo de texto para "Lugar"
-      fecha: ['', Validators.required], // Campo de texto para "Fecha"
-      procedimiento: ['', Validators.required], // Campo de texto para "Procedimiento"
-      nivelRuido: [false], // Checkbox para "Nivel de Ruido"
-      materialFilo: [false], // Checkbox para "Material con filo"
-      quimicos: [false], // Checkbox para "Químicos"
-      iluminacion: [false], // Checkbox para "Iluminación"
-      ventilacion: [false], // Checkbox para "Ventilación"
-      caidas: [false], // Checkbox para "Caídas"
-      gafasSeguridad: [false], // Checkbox para "Gafas de Seguridad"
-      arnes: [false], // Checkbox para "Arnés"
-      guantes: [false], // Checkbox para "Guantes"
-      casco: [false] // Checkbox para "Casco"
+      lugar: ['', Validators.required],
+      fecha: ['', Validators.required],
+      procedimiento: ['', Validators.required],
+      nivelRuido: [false],
+      materialFilo: [false],
+      quimicos: [false],
+      iluminacion: [false],
+      ventilacion: [false],
+      caidas: [false],
+      gafasSeguridad: [false],
+      arnes: [false],
+      guantes: [false],
+      casco: [false]
     });
   }
 
-  // Método para enviar el formulario
   enviarFormulario() {
     if (this.ATSForm.valid) {
       const datos = this.ATSForm.value;
 
-      // Enviar los datos al servidor
       this.http.post<{ message: string }>('http://localhost:3000/api/ats', datos).subscribe({
-        next: (response: { message: string }) => {
+        next: (response) => {
           console.log('Datos guardados:', response);
-          alert('Ha sido guardado exitosamente'); // Mensaje de éxito
+          this.showModal = true; // Mostrar el modal de éxito
         },
-        error: (error: any) => {
+        error: (error) => {
           console.error('Error al guardar:', error);
-          alert('Error al guardar el ATS'); // Mensaje de error
+          alert('Error al guardar el ATS');
         }
       });
     } else {
-      alert('Formulario no válido'); // Mensaje de validación
+      alert('Formulario no válido');
     }
   }
-}
 
+  cerrarModal() {
+    this.showModal = false;
+  }
+}

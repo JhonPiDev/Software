@@ -1,0 +1,48 @@
+<!-- Tabla de historial ATS -->
+<div class="bg-white p-6 rounded-lg shadow-md">
+  <h2 class="text-lg font-semibold mb-4 text-center">Historial de ATS</h2>
+
+  <div class="overflow-x-auto">
+    <table class="table-auto w-full border-collapse border border-gray-300">
+      <thead>
+        <tr class="bg-blue-500 text-white">
+          <th class="px-3 py-2 border">Lugar</th>
+          <th class="px-3 py-2 border">Fecha</th>
+          <th class="px-3 py-2 border">Procedimiento</th>
+          <th class="px-3 py-2 border">Nivel de Ruido</th>
+          <th class="px-3 py-2 border">Material Filo</th>
+          <th class="px-3 py-2 border">Químicos</th>
+          <th class="px-3 py-2 border">Iluminación</th>
+          <th class="px-3 py-2 border">Ventilación</th>
+          <th class="px-3 py-2 border">Caídas</th>
+          <th class="px-3 py-2 border">Gafas de Seguridad</th>
+          <th class="px-3 py-2 border">Arnés</th>
+          <th class="px-3 py-2 border">Guantes</th>
+          <th class="px-3 py-2 border">Casco</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of historialAts; let i = index" 
+            [class.bg-gray-50]="i % 2 === 0" [class.bg-white]="i % 2 !== 0">
+          <td class="px-3 py-2 border">{{ item.lugar }}</td>
+          <td class="px-3 py-2 border">{{ item.fecha | date:'dd/MM/yyyy' }}</td>
+          <td class="px-3 py-2 border">{{ item.procedimiento }}</td>
+          <td class="px-3 py-2 border">{{ item.nivel_ruido ? 'Sí' : 'No' }}</td>
+          <td class="px-3 py-2 border">{{ item.material_filo ? 'Sí' : 'No' }}</td>
+          <td class="px-3 py-2 border">{{ item.quimicos ? 'Sí' : 'No' }}</td>
+          <td class="px-3 py-2 border">{{ item.iluminacion ? 'Sí' : 'No' }}</td>
+          <td class="px-3 py-2 border">{{ item.ventilacion ? 'Sí' : 'No' }}</td>
+          <td class="px-3 py-2 border">{{ item.caidas ? 'Sí' : 'No' }}</td>
+          <td class="px-3 py-2 border">{{ item.gafas_seguridad ? 'Sí' : 'No' }}</td>
+          <td class="px-3 py-2 border">{{ item.arnes ? 'Sí' : 'No' }}</td>
+          <td class="px-3 py-2 border">{{ item.guantes ? 'Sí' : 'No' }}</td>
+          <td class="px-3 py-2 border">{{ item.casco ? 'Sí' : 'No' }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p *ngIf="historialAts.length === 0" class="text-center text-gray-500 mt-4">
+    No hay registros disponibles.
+  </p>
+</div>

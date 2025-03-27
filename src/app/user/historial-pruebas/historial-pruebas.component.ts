@@ -130,29 +130,48 @@ export class HistorialPruebasComponent implements OnInit {
   exportarRegistroPDF(registro: any) {
     const doc = new jsPDF();
   
-    // Título del documento
+    // Estilos generales
+    doc.setFont('helvetica', 'bold');
     doc.setFontSize(18);
-    doc.text('Registro de Prueba Hidrostática', 20, 20);
+    doc.text('Registro de Prueba Hidrostática', 105, 20, { align: 'center' });
   
-    // Información del registro
+    // Línea separadora
+    doc.setLineWidth(0.5);
+    doc.line(20, 25, 190, 25);
+  
+    // Información del registro (Tabla)
     doc.setFontSize(12);
-    doc.text(`ID: ${registro.id}`, 20, 40);
-    doc.text(`Material: ${registro.material}`, 20, 50);
-    doc.text(`Producto: ${registro.producto}`, 20, 60);
-    doc.text(`Fecha de Prueba: ${registro.fecha_prueba}`, 20, 70);
-    doc.text(`Estado: ${registro.estado_prueba}`, 20, 80);
+    doc.setFont('helvetica', 'normal');
+    const datos = [
+      ['ID', registro.id],
+      ['Material', registro.material],
+      ['Producto', registro.producto],
+      ['Fecha de Prueba', registro.fecha_prueba],
+      ['Estado', registro.estado_prueba]
+    ];
+  
+    let y = 40;
+    datos.forEach(([clave, valor]) => {
+      doc.setFont('helvetica', 'bold');
+      doc.text(`${clave}:`, 20, y);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`${valor}`, 70, y);
+      y += 10;
+    });
   
     // Observaciones (manejo de texto largo)
-    doc.text('Observaciones:', 20, 90);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Observaciones:', 20, y);
+    doc.setFont('helvetica', 'normal');
     const observaciones = doc.splitTextToSize(registro.observaciones || 'Ninguna', 160);
-    doc.text(observaciones, 20, 100);
+    doc.text(observaciones, 20, y + 10);
   
     // Insertar imagen si existe
     if (registro.imagen_base64) {
       const imgData = `data:image/png;base64,${registro.imagen_base64}`;
-      doc.addImage(imgData, 'PNG', 20, 120, 100, 80); // Posición X, Y, Ancho, Alto
+      doc.addImage(imgData, 'PNG', 55, y + 30, 100, 80); // Centrada horizontalmente
     } else {
-      doc.text('Sin imagen adjunta', 20, 130);
+      doc.text('Sin imagen adjunta', 20, y + 40);
     }
   
     // Guardar PDF con nombre personalizado

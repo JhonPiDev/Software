@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-users',
@@ -63,14 +64,39 @@ export class UsersComponent {
   }
 
   eliminarUsuario(id: string) {
-    if (!confirm('¿Estás seguro de eliminar este usuario?')) return;
-
-    this.http.delete(`http://localhost:3000/users/${id}`).subscribe(
-      (response: any) => {
-        this.successMessage = 'Usuario eliminado exitosamente.';
-        this.cargarUsuarios(); // Recargar lista de usuarios después de eliminar uno
-      },
-      (error) => this.errorMessage = 'Error al eliminar el usuario.'
-    );
+    Swal.fire({
+      title: "¿Estás seguro?",
+      text: "¡No podrás revertir esta acción!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Sí, eliminar",
+      cancelButtonText: "Cancelar" // Opcional: personaliza el texto del botón cancelar
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.http.delete(`http://localhost:3000/users/${id}`).subscribe(
+          (response: any) => {
+            Swal.fire({
+              title: "¡Eliminado!",
+              text: "El usuario ha sido eliminado exitosamente.",
+              icon: "success",
+              timer: 2000, // Opcional: cierra automáticamente después de 2 segundos
+              showConfirmButton: false // Opcional: elimina el botón "OK"
+            });
+            this.successMessage = 'Usuario eliminado exitosamente.';
+            this.cargarUsuarios(); // Recargar lista de usuarios después de eliminar uno
+          },
+          (error) => {
+            Swal.fire({
+              title: "Error",
+              text: "Hubo un problema al eliminar el usuario.",
+              icon: "error"
+            });
+            this.errorMessage = 'Error al eliminar el usuario.';
+          }
+        );
+      }
+    });
   }
 }

@@ -39,6 +39,8 @@ export class LoginComponent {
         
         if (response.role === 'admin') {
           this.router.navigate(['/admin']); // Redirigir a admin
+        } else if (response.role === 'inspector') {
+          this.router.navigate(['/inspector']); // Redirigir a inspector
         } else {
           this.router.navigate(['/user']); // Redirigir a usuario normal
         }
@@ -49,5 +51,6 @@ export class LoginComponent {
       }
     );
   }
+  
   
 }

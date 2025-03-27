@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-team',
@@ -40,12 +41,22 @@ export class TeamComponent implements OnInit {
   }
 
   obtenerEquipos() {
-    this.http.get<any[]>('http://localhost:3000/equipos')
-      .subscribe(response => {
-        this.equipos = response;
-      }, error => {
-        console.error('Error al obtener equipos', error);
-      });
+    this.http.get<any[]>('http://localhost:3000/equipos').subscribe(
+      (response) => {
+        this.equipos = response; // Asigna la respuesta, sea un array vacío o con datos
+        if (response.length === 0) {
+          console.log('No hay equipos registrados'); // Opcional: mensaje en consola
+          // Opcional: mostrar un mensaje al usuario con SweetAlert2
+          Swal.fire('Información', 'No hay equipos registrados', 'info');
+        }
+      },
+      (error) => {
+        // Este bloque solo se ejecutará en caso de errores reales (ej. servidor caído)
+        console.error('Error al obtener equipos:', error);
+        // Opcional: mostrar alerta al usuario
+        // Swal.fire('Error', 'No se pudo obtener la lista de equipos', 'error');
+      }
+    );
   }
 
   guardarEquipo() {
@@ -72,12 +83,39 @@ export class TeamComponent implements OnInit {
   }
 
   eliminarEquipo(id: number) {
-    this.http.delete(`http://localhost:3000/equipos/${id}`)
-      .subscribe(() => {
-        this.obtenerEquipos();
-      });
+    Swal.fire({
+      title: "¿Estás seguro?",
+      text: "¡No podrás deshacer esta acción!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Sí, eliminar",
+      cancelButtonText: "Cancelar"
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.http.delete(`http://localhost:3000/equipos/${id}`).subscribe(
+          () => {
+            Swal.fire({
+              title: "¡Eliminado!",
+              text: "El equipo ha sido eliminado exitosamente.",
+              icon: "success",
+              timer: 2000,
+              showConfirmButton: false
+            });
+            this.obtenerEquipos(); // Recargar lista de equipos después de eliminar
+          },
+          (error) => {
+            Swal.fire({
+              title: "Error",
+              text: "No se pudo eliminar el equipo.",
+              icon: "error"
+            });
+          }
+        );
+      }
+    });
   }
-
   resetFormulario() {
     this.nuevoEquipo = { material: '', tipoTanque: '', capacidad: null, anioFabricacion: null, producto: '' };
     this.editando = false;

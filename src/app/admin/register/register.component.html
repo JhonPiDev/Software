@@ -1,0 +1,138 @@
+<div class="text-center my-4">
+    <!-- Botón para abrir el modal -->
+    <button
+      (click)="mostrarFormulario = true"
+      class="bg-cyan-500 text-white py-2 px-4 rounded-lg hover:bg-cyan-600 transition duration-200"
+    >
+      Registrar Cliente
+    </button>
+  </div>
+  
+  <!-- MODAL - Formulario de Registro -->
+  <div *ngIf="mostrarFormulario" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+    <div class="bg-white p-6 rounded-lg shadow-md max-w-md w-full relative">
+      <!-- Botón para cerrar el modal -->
+      <button (click)="mostrarFormulario = false" class="absolute top-2 right-2 text-gray-500 hover:text-gray-800">
+        ✖
+      </button>
+  
+      <h2 class="text-2xl font-semibold text-gray-700 text-center mb-4">Registrar Nuevo Cliente</h2>
+  
+      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+        <!-- Campo de NIT -->
+        <div class="mb-4">
+          <label for="nit" class="block text-gray-700">NIT</label>
+          <input
+            type="text"
+            id="nit"
+            formControlName="nit"
+            class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500"
+            placeholder="Ingrese el NIT"
+          />
+        </div>
+  
+        <!-- Campo de Razón Social -->
+        <div class="mb-4">
+          <label for="razonSocial" class="block text-gray-700">Razón Social</label>
+          <input
+            type="text"
+            id="razonSocial"
+            formControlName="razonSocial"
+            class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500"
+            placeholder="Ingrese la Razón Social"
+          />
+        </div>
+  
+        <!-- Campo de Dirección -->
+        <div class="mb-4">
+          <label for="direccion" class="block text-gray-700">Dirección</label>
+          <input
+            type="text"
+            id="direccion"
+            formControlName="direccion"
+            class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500"
+            placeholder="Ingrese la Dirección"
+          />
+        </div>
+  
+        <!-- Campo de Teléfono -->
+        <div class="mb-4">
+          <label for="telefono" class="block text-gray-700">Teléfono</label>
+          <input
+            type="text"
+            id="telefono"
+            formControlName="telefono"
+            class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500"
+            placeholder="Ingrese el Teléfono"
+          />
+        </div>
+  
+        <!-- Campo de Establecimiento -->
+        <div class="mb-4">
+          <label for="establecimiento" class="block text-gray-700">Establecimiento</label>
+          <input
+            type="text"
+            id="establecimiento"
+            formControlName="establecimiento"
+            class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500"
+            placeholder="Ingrese el Establecimiento"
+          />
+        </div>
+  
+        <!-- Botón de Enviar -->
+        <button
+          type="submit"
+          [disabled]="registerForm.invalid || isSubmitting"
+          class="w-full bg-cyan-500 text-white py-2 px-4 rounded-lg hover:bg-cyan-600 transition duration-200 flex items-center justify-center"
+        >
+          <span *ngIf="isSubmitting" class="animate-spin mr-2 border-2 border-white border-t-transparent rounded-full w-5 h-5"></span>
+          Registrar
+        </button>
+      </form>
+  
+      <!-- Mensaje de éxito -->
+      <p *ngIf="successMessage" class="mt-4 text-green-500 text-center">{{ successMessage }}</p>
+  
+      <!-- Mensaje de error -->
+      <p *ngIf="errorMessage" class="mt-4 text-red-500 text-center">{{ errorMessage }}</p>
+    </div>
+  </div>
+  <!-- Lista de Clientes Registrados -->
+<div class="mt-6">
+  <h2 class="text-xl font-semibold text-gray-700 text-center mb-4">Lista de Clientes</h2>
+  <table class="w-full border-collapse border border-gray-300">
+    <thead>
+      <tr class="bg-cyan-500 text-white">
+        <th class="border border-gray-300 px-4 py-2">NIT</th>
+        <th class="border border-gray-300 px-4 py-2">Razón Social</th>
+        <th class="border border-gray-300 px-4 py-2">Dirección</th>
+        <th class="border border-gray-300 px-4 py-2">Teléfono</th>
+        <th class="border border-gray-300 px-4 py-2">Establecimiento</th>
+        <th class="border border-gray-300 px-4 py-2">Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let cliente of clientes" class="text-center">
+        <td class="border border-gray-300 px-4 py-2">{{ cliente.nit }}</td>
+        <td class="border border-gray-300 px-4 py-2">{{ cliente.razon_social }}</td>
+        <td class="border border-gray-300 px-4 py-2">{{ cliente.direccion }}</td>
+        <td class="border border-gray-300 px-4 py-2">{{ cliente.telefono }}</td>
+        <td class="border border-gray-300 px-4 py-2">{{ cliente.establecimiento }}</td>
+        <td class="border border-gray-300 px-4 py-2">
+          <button 
+            (click)="eliminarCliente(cliente.nit)" 
+            class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition"
+          >
+            Eliminar
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Mensaje si no hay clientes -->
+  <p *ngIf="clientes.length === 0" class="text-center text-gray-500 mt-4">
+    No hay clientes registrados.
+  </p>
+</div>
+
