@@ -24,25 +24,31 @@ export class LoginComponent {
 
   onSubmit() {
     console.log('Botón de login clickeado');
-  
+
     if (this.loginForm.invalid) {
       console.log('Formulario inválido');
       return;
     }
-  
+
     const { username, password } = this.loginForm.value;
     console.log('Datos enviados:', { username, password });
-  
+
     this.http.post('http://localhost:3000/login', { username, password }).subscribe(
       (response: any) => {
         console.log('Respuesta del backend:', response);
-        
+
+        // Guardar el rol en localStorage
+      localStorage.setItem('role', response.role); 
+      // Guardar ID del usuario en localStorage
+      localStorage.setItem('userId', response.id);
+
+        // Redirigir según el rol del usuario
         if (response.role === 'admin') {
-          this.router.navigate(['/admin']); // Redirigir a admin
+          this.router.navigate(['/admin']);
         } else if (response.role === 'inspector') {
-          this.router.navigate(['/inspector']); // Redirigir a inspector
+          this.router.navigate(['/inspector']);
         } else {
-          this.router.navigate(['/user']); // Redirigir a usuario normal
+          this.router.navigate(['/user']);
         }
       },
       (error) => {
@@ -51,6 +57,5 @@ export class LoginComponent {
       }
     );
   }
-  
-  
 }
+

@@ -35,34 +35,48 @@ db.connect((err) => {
   console.log('✅ Conectado a MySQL');
 });
 
+
 // Ruta para registrar información técnica
 app.post('/registros_tecnicos', upload.single('imagen'), (req, res) => {
   console.log('📩 Datos recibidos:', req.body);
-  console.log('📸 Imagen recibida:', req.file);
+  console.log('📸 Imágenes recibidas:', req.files);
 
   const {
-    material, tipoTanque, capacidad, anioFabricacion, producto,
-    presion, temperatura, fechaPrueba, horaPrueba, estadoPrueba, observaciones
+    userId, material, tipoTanque, capacidad, anioFabricacion, producto,
+    presion, temperatura, fechaPrueba, horaPrueba, estadoPrueba, observaciones,
+    selectedTankId, selectedNit
   } = req.body;
 
-  if (!material || !tipoTanque || !capacidad || !anioFabricacion || !producto ||
-      !presion || !temperatura || !fechaPrueba || !horaPrueba || !estadoPrueba) {
-    return res.status(400).json({ message: 'Todos los campos son obligatorios.' });
+  // 🔍 Validación: Asegurar que los campos obligatorios están presentes
+  if (!userId || !material || !tipoTanque || !capacidad || !anioFabricacion || 
+      !producto || !presion || !temperatura || !fechaPrueba || !horaPrueba || 
+      !estadoPrueba || !selectedTankId || !selectedNit) {
+    return res.status(400).json({ message: 'Todos los campos obligatorios deben estar completos.' });
   }
 
+  // 🔹 Convertir imágenes a Base64 solo si existen
+  let imagenesBase64 = null;
+  if (req.files && req.files.length > 0) {
+    imagenesBase64 = JSON.stringify(req.files.map(file => file.buffer.toString('base64')));
+  }
   const imagenBuffer = req.file ? req.file.buffer : null; // Convertir la imagen a binario
 
+  // 🛠 SQL para insertar en la base de datos
   const sql = `
     INSERT INTO registros_tecnicos 
-    (material, tipo_tanque, capacidad, anio_fabricacion, producto, presion, 
-    temperatura, fecha_prueba, hora_prueba, estado_prueba, observaciones, imagenes_base64) 
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+    (usuario_id, material, tipo_tanque, capacidad, anio_fabricacion, producto, 
+    presion, temperatura, fecha_prueba, hora_prueba, estado_prueba, observaciones, imagenes_base64, usuario_nit, equipo_id) 
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `;
 
   const values = [
-    material, tipoTanque, capacidad, anioFabricacion, producto, presion,
-    temperatura, fechaPrueba, horaPrueba, estadoPrueba, observaciones, imagenBuffer
+    userId, material, tipoTanque, capacidad, anioFabricacion,
+    producto, presion, temperatura, fechaPrueba, horaPrueba, estadoPrueba, observaciones,
+    imagenBuffer, // Si no hay imágenes, será NULL
+    selectedNit, selectedTankId
   ];
 
+  // 🔥 Guardar en la base de datos
   db.query(sql, values, (err, result) => {
     if (err) {
       console.error('❌ Error al insertar en MySQL:', err);
@@ -72,6 +86,7 @@ app.post('/registros_tecnicos', upload.single('imagen'), (req, res) => {
     res.status(201).json({ message: 'Registro guardado correctamente.', id: result.insertId });
   });
 });
+
 
 // Ruta para actualizar un registro técnico
 app.put('/registros/:id', (req, res) => {
@@ -202,16 +217,17 @@ app.post('/login', (req, res) => {
       return res.status(401).json({ message: 'Contraseña incorrecta' });
     }
 
-    // Verificar el rol del usuario y responder según corresponda
-    if (user.role === 'admin') {
-      return res.status(200).json({ message: 'Login exitoso', role: 'admin' });
-    } else if (user.role === 'inspector') {
-      return res.status(200).json({ message: 'Login exitoso', role: 'inspector' });
-    } else {
-      return res.status(200).json({ message: 'Login exitoso', role: 'user' });
-    }
+    // Responder con el ID, username y rol del usuario
+    return res.status(200).json({
+      message: 'Login exitoso',
+      id: user.id,         // Envía el ID del usuario
+      username: user.username, // Envía el username
+      role: user.role      // Envía el rol
+    });
   });
 });
+
+
 
 
 // Ruta para enlistar un registro técnico
@@ -333,62 +349,72 @@ app.delete('/equipos/:id', (req, res) => {
 
 // *ruta para ingresar los ats*
 app.post('/api/ats', (req, res) => {
-  console.log('Solicitud recibida en /api/ats:', req.body);
   const {
+    usuario_nit,
     lugar,
     fecha,
     procedimiento,
-    nivelRuido,
-    materialFilo,
+    nivel_ruido,
+    material_filo,
     quimicos,
     iluminacion,
     ventilacion,
     caidas,
-    gafasSeguridad,
+    gafas_seguridad,
     arnes,
     guantes,
-    casco
+    casco,
+    estado // Nuevo campo
   } = req.body;
 
   const query = `
     INSERT INTO ats (
-      lugar, fecha, procedimiento, nivel_ruido, material_filo, quimicos, iluminacion, ventilacion, caidas, gafas_seguridad, arnes, guantes, casco
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      usuario_nit, lugar, fecha, procedimiento, nivel_ruido, material_filo, quimicos, iluminacion, ventilacion, caidas,
+      gafas_seguridad, arnes, guantes, casco, estado
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
   const values = [
+    usuario_nit,
     lugar,
     fecha,
     procedimiento,
-    nivelRuido,
-    materialFilo,
-    quimicos,
-    iluminacion,
-    ventilacion,
-    caidas,
-    gafasSeguridad,
-    arnes,
-    guantes,
-    casco
+    nivel_ruido ? 1 : 0,
+    material_filo ? 1 : 0,
+    quimicos ? 1 : 0,
+    iluminacion ? 1 : 0,
+    ventilacion ? 1 : 0,
+    caidas ? 1 : 0,
+    gafas_seguridad ? 1 : 0,
+    arnes ? 1 : 0,
+    guantes ? 1 : 0,
+    casco ? 1 : 0,
+    estado ? 1 : 0 // Guardar el estado (1 o 0)
   ];
 
   db.query(query, values, (err, result) => {
     if (err) {
-      console.error('Error al guardar el ATS:', err);
+      console.error('Error al guardar ATS:', err);
       return res.status(500).json({ message: 'Error al guardar el ATS' });
     }
-    res.status(201).json({ message: 'ATS guardado correctamente', id: result.insertId });
+    res.status(200).json({ message: 'ATS guardado correctamente' });
   });
 });
-
 // * Ruta para obtener el historial ATS *
 app.get('/api/historial', (req, res) => {
+  const usuario_nit = req.query.nit;
+  if (!usuario_nit) {
+    return res.status(400).json({ message: 'Falta el NIT del cliente' });
+  }
+
   const query = `
-    SELECT id, lugar, fecha, procedimiento, nivel_ruido, material_filo, quimicos, iluminacion, ventilacion, caidas, gafas_seguridad, arnes, guantes, casco 
-    FROM ats
+    SELECT id, lugar, fecha, procedimiento, nivel_ruido, material_filo, quimicos, iluminacion, ventilacion, caidas, 
+           gafas_seguridad, arnes, guantes, casco 
+    FROM ats 
+    WHERE usuario_nit = ?
   `;
 
-  db.query(query, (err, results) => {
+  db.query(query, [usuario_nit], (err, results) => {
     if (err) {
       console.error('Error al obtener los ATS:', err);
       return res.status(500).json({ message: 'Error al obtener los ATS' });
@@ -397,6 +423,32 @@ app.get('/api/historial', (req, res) => {
   });
 });
 
+app.get('/api/ultimo-ats', (req, res) => {
+  const usuario_nit = req.query.nit;
+  if (!usuario_nit) {
+    return res.status(400).json({ message: 'Falta el NIT del cliente' });
+  }
+
+  const query = `
+    SELECT id, lugar, fecha, procedimiento, nivel_ruido, material_filo, quimicos, iluminacion, ventilacion, caidas, 
+           gafas_seguridad, arnes, guantes, casco 
+    FROM ats 
+    WHERE usuario_nit = ?
+    ORDER BY created_at DESC
+    LIMIT 1
+  `;
+
+  db.query(query, [usuario_nit], (err, results) => {
+    if (err) {
+      console.error('Error al obtener el último ATS:', err);
+      return res.status(500).json({ message: 'Error al obtener el último ATS' });
+    }
+    if (results.length === 0) {
+      return res.json({ noAts: true });
+    }
+    res.json(results[0]);
+  });
+});
 
 // Inicia el servidor
 app.listen(port, () => {

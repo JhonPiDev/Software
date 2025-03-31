@@ -1,4 +1,3 @@
-<!-- Tabla de historial ATS -->
 <div class="bg-white p-6 rounded-lg shadow-md">
   <h2 class="text-lg font-semibold mb-4 text-center">Historial de ATS</h2>
 
@@ -27,16 +26,56 @@
           <td class="px-3 py-2 border">{{ item.lugar }}</td>
           <td class="px-3 py-2 border">{{ item.fecha | date:'dd/MM/yyyy' }}</td>
           <td class="px-3 py-2 border">{{ item.procedimiento }}</td>
-          <td class="px-3 py-2 border">{{ item.nivel_ruido ? 'Sí' : 'No' }}</td>
-          <td class="px-3 py-2 border">{{ item.material_filo ? 'Sí' : 'No' }}</td>
-          <td class="px-3 py-2 border">{{ item.quimicos ? 'Sí' : 'No' }}</td>
-          <td class="px-3 py-2 border">{{ item.iluminacion ? 'Sí' : 'No' }}</td>
-          <td class="px-3 py-2 border">{{ item.ventilacion ? 'Sí' : 'No' }}</td>
-          <td class="px-3 py-2 border">{{ item.caidas ? 'Sí' : 'No' }}</td>
-          <td class="px-3 py-2 border">{{ item.gafas_seguridad ? 'Sí' : 'No' }}</td>
-          <td class="px-3 py-2 border">{{ item.arnes ? 'Sí' : 'No' }}</td>
-          <td class="px-3 py-2 border">{{ item.guantes ? 'Sí' : 'No' }}</td>
-          <td class="px-3 py-2 border">{{ item.casco ? 'Sí' : 'No' }}</td>
+          <td class="px-3 py-2 border">
+            <span [class.text-green-500]="item.nivel_ruido" [class.text-red-500]="!item.nivel_ruido">
+              {{ item.nivel_ruido ? 'Sí' : 'No' }}
+            </span>
+          </td>
+          <td class="px-3 py-2 border">
+            <span [class.text-green-500]="item.material_filo" [class.text-red-500]="!item.material_filo">
+              {{ item.material_filo ? 'Sí' : 'No' }}
+            </span>
+          </td>
+          <td class="px-3 py-2 border">
+            <span [class.text-green-500]="item.quimicos" [class.text-red-500]="!item.quimicos">
+              {{ item.quimicos ? 'Sí' : 'No' }}
+            </span>
+          </td>
+          <td class="px-3 py-2 border">
+            <span [class.text-green-500]="item.iluminacion" [class.text-red-500]="!item.iluminacion">
+              {{ item.iluminacion ? 'Sí' : 'No' }}
+            </span>
+          </td>
+          <td class="px-3 py-2 border">
+            <span [class.text-green-500]="item.ventilacion" [class.text-red-500]="!item.ventilacion">
+              {{ item.ventilacion ? 'Sí' : 'No' }}
+            </span>
+          </td>
+          <td class="px-3 py-2 border">
+            <span [class.text-green-500]="item.caidas" [class.text-red-500]="!item.caidas">
+              {{ item.caidas ? 'Sí' : 'No' }}
+            </span>
+          </td>
+          <td class="px-3 py-2 border">
+            <span [class.text-green-500]="item.gafas_seguridad" [class.text-red-500]="!item.gafas_seguridad">
+              {{ item.gafas_seguridad ? 'Sí' : 'No' }}
+            </span>
+          </td>
+          <td class="px-3 py-2 border">
+            <span [class.text-green-500]="item.arnes" [class.text-red-500]="!item.arnes">
+              {{ item.arnes ? 'Sí' : 'No' }}
+            </span>
+          </td>
+          <td class="px-3 py-2 border">
+            <span [class.text-green-500]="item.guantes" [class.text-red-500]="!item.guantes">
+              {{ item.guantes ? 'Sí' : 'No' }}
+            </span>
+          </td>
+          <td class="px-3 py-2 border">
+            <span [class.text-green-500]="item.casco" [class.text-red-500]="!item.casco">
+              {{ item.casco ? 'Sí' : 'No' }}
+            </span>
+          </td>
         </tr>
       </tbody>
     </table>

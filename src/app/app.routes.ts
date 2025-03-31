@@ -16,8 +16,9 @@ import { TeamComponent } from './admin/team/team.component';
 import { RegisterComponent } from './admin/register/register.component';
 import { InspectorComponent } from './inspector/inspector.component';
 import { RegistrosComponent } from './inspector/registros/registros.component';
-// import { HomeComponent } from './inspector/home/home.component';
-
+import { HomesComponent } from './inspector/homes/homes.component';
+import { ClienteComponent } from './user/cliente/cliente.component'; // Asegúrate de importar el componente ClienteComponent
+import { ClienteDashboardComponent } from './user/cliente-dashboard/cliente-dashboard.component';
 
 
 export const routes: Routes = [
@@ -27,13 +28,16 @@ export const routes: Routes = [
     path: 'user',// Ruta para la página de usuario // Ruta para el login
     component: UserComponent,
     children: [
+      
+      { path: 'cliente', component: ClienteComponent }, // Ruta para el cliente
+      { path: 'cliente-dashboard', component: ClienteDashboardComponent }, // Ruta para el dashboard del cliente
       { path: 'registro-pruebas', component: RegistroPruebasComponent },
       { path: 'historial-pruebas', component: HistorialPruebasComponent },
       { path: 'historial-ats', component: HistorialAtsComponent },
       { path: 'exportacion-informes', component: ExportacionInformesComponent },
       { path: 'notificaciones', component: NotificacionesComponent },
       { path: 'ats', component: ATSComponent },
-      { path: '', redirectTo: 'registro-pruebas', pathMatch: 'full' }, // Ruta por defecto
+      { path: '', redirectTo: 'cliente', pathMatch: 'full' }, // Ruta por defecto
     ],
   },
   {
@@ -51,10 +55,11 @@ export const routes: Routes = [
     ],
   },
   { path: 'inspector', component: InspectorComponent,
-     children: [ 
-      { path: 'registros', component: RegistrosComponent },
-      { path: 'home', component: HomeComponent }, // Ruta para Inicio
-    ],
-  }, // Ruta para inspector (puedes cambiar el componente si es necesario)
+    children: [ 
+     { path: 'registros', component: RegistrosComponent }, // Ruta para Inicio del inspectors
+     { path: 'homes', component: HomesComponent }, // Ruta para Inicio
+     { path: '', redirectTo: 'homes', pathMatch: 'full' }, // Ruta por defecto
+   ],
+ }, // Ruta para inspector (puedes cambiar el componente si es necesario)
   { path: '**', redirectTo: '/login' }, // Ruta comodín para redirigir a login si no existe la ruta
 ];

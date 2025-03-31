@@ -1,0 +1,43 @@
+<!-- Lista de Clientes Registrados -->
+<div class="mt-6">
+    <h2 class="text-xl font-semibold text-gray-700 text-center mb-4">Lista de Clientes</h2>
+    <table class="w-full border-collapse border border-gray-300">
+      <thead>
+        <tr class="bg-cyan-500 text-white">
+          <th class="border border-gray-300 px-4 py-2">NIT</th>
+          <th class="border border-gray-300 px-4 py-2">Razón Social</th>
+          <th class="border border-gray-300 px-4 py-2">Dirección</th>
+          <th class="border border-gray-300 px-4 py-2">Teléfono</th>
+          <th class="border border-gray-300 px-4 py-2">Establecimiento</th>
+          <th class="border border-gray-300 px-4 py-2">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr 
+          *ngFor="let cliente of clientes" 
+          class="text-center hover:bg-gray-200 cursor-pointer"
+          (click)="hacerPrueba(cliente)"
+        >
+          <td class="border border-gray-300 px-4 py-2">{{ cliente.nit }}</td>
+          <td class="border border-gray-300 px-4 py-2">{{ cliente.razon_social }}</td>
+          <td class="border border-gray-300 px-4 py-2">{{ cliente.direccion }}</td>
+          <td class="border border-gray-300 px-4 py-2">{{ cliente.telefono }}</td>
+          <td class="border border-gray-300 px-4 py-2">{{ cliente.establecimiento }}</td>
+          <td class="border border-gray-300 px-4 py-2">
+            <button 
+              (click)="hacerPrueba(cliente); $event.stopPropagation()" 
+              class="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 transition cursor-pointer"
+            >
+              Hacer Prueba
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  
+    <!-- Mensaje si no hay clientes -->
+    <p *ngIf="clientes.length === 0" class="text-center text-gray-500 mt-4">
+      No hay clientes registrados.
+    </p>
+  </div>
+  
