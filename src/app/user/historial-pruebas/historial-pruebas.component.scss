@@ -86,4 +86,32 @@ input {
     100% {
       transform: translateY(0%);
     }
-  } 
+  } .estado-prueba.bg-green-500 {
+    background-color: #22c55e; /* Verde */
+  }
+  .estado-prueba.bg-red-500 {
+    background-color: #ef4444; /* Rojo */
+  }
+  .estado-prueba {
+    position: relative;
+    top: 0;
+    right: 0;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: white;
+    text-transform: uppercase;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Estilos para los botones de paginación */
+  button:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+  
+  button:not(:disabled):hover {
+    transform: scale(1.05);
+    transition: transform 0.2s ease-in-out;
+  }

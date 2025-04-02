@@ -43,14 +43,14 @@ app.post('/registros_tecnicos', upload.single('imagen'), (req, res) => {
 
   const {
     userId, material, tipoTanque, capacidad, anioFabricacion, producto,
-    presion, temperatura, fechaPrueba, horaPrueba, estadoPrueba, observaciones,
+    presion, temperatura, fechaPrueba, horaPrueba, observaciones,
     selectedTankId, selectedNit
   } = req.body;
 
   // 🔍 Validación: Asegurar que los campos obligatorios están presentes
   if (!userId || !material || !tipoTanque || !capacidad || !anioFabricacion || 
       !producto || !presion || !temperatura || !fechaPrueba || !horaPrueba || 
-      !estadoPrueba || !selectedTankId || !selectedNit) {
+      !selectedTankId || !selectedNit) {
     return res.status(400).json({ message: 'Todos los campos obligatorios deben estar completos.' });
   }
 
@@ -65,13 +65,13 @@ app.post('/registros_tecnicos', upload.single('imagen'), (req, res) => {
   const sql = `
     INSERT INTO registros_tecnicos 
     (usuario_id, material, tipo_tanque, capacidad, anio_fabricacion, producto, 
-    presion, temperatura, fecha_prueba, hora_prueba, estado_prueba, observaciones, imagenes_base64, usuario_nit, equipo_id) 
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    presion, temperatura, fecha_prueba, hora_prueba, observaciones, imagenes_base64, usuario_nit, equipo_id) 
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
   const values = [
     userId, material, tipoTanque, capacidad, anioFabricacion,
-    producto, presion, temperatura, fechaPrueba, horaPrueba, estadoPrueba, observaciones,
+    producto, presion, temperatura, fechaPrueba, horaPrueba, observaciones,
     imagenBuffer, // Si no hay imágenes, será NULL
     selectedNit, selectedTankId
   ];
@@ -87,19 +87,94 @@ app.post('/registros_tecnicos', upload.single('imagen'), (req, res) => {
   });
 });
 
+// Endpoint para obtener todos los registros técnicos con información del cliente
+app.get('/registros_tecnicos', (req, res) => {
+  const page = parseInt(req.query.page) || 1; // Número de página (por defecto 1)
+  const limit = parseInt(req.query.limit) || 10; // Número de registros por página (por defecto 10)
+  const offset = (page - 1) * limit; // Calcular el desplazamiento
+
+  // Consulta para obtener el número total de registros
+  const countQuery = `SELECT COUNT(*) as total FROM registros_tecnicos`;
+
+  // Consulta para obtener los registros de la página actual
+  const query = `
+    SELECT 
+      rt.*,
+      u.nit AS cliente_nit,
+      u.razon_social AS cliente_nombre
+    FROM registros_tecnicos rt
+    LEFT JOIN usuario u ON rt.usuario_nit = u.nit
+    LIMIT ? OFFSET ?
+  `;
+
+  // Primero, obtener el número total de registros
+  db.query(countQuery, (err, countResult) => {
+    if (err) {
+      console.error('Error al contar registros:', err);
+      return res.status(500).json({ message: 'Error al contar los registros' });
+    }
+
+    const totalRegistros = countResult[0].total;
+    const totalPages = Math.ceil(totalRegistros / limit);
+
+    // Luego, obtener los registros de la página actual
+    db.query(query, [limit, offset], (err, results) => {
+      if (err) {
+        console.error('Error al obtener registros:', err);
+        return res.status(500).json({ message: 'Error al obtener los registros' });
+      }
+
+      // Devolver los registros y la información de paginación
+      res.status(200).json({
+        registros: results,
+        totalRegistros,
+        totalPages,
+        currentPage: page
+      });
+    });
+  });
+});
+// Endpoint para actualizar el estado de un registro
+app.put('/registros_tecnicos/:id', (req, res) => {
+  const { id } = req.params;
+  const { estado_prueba } = req.body;
+
+  const query = `
+    UPDATE registros_tecnicos SET estado_prueba = ? WHERE id = ?
+  `;
+
+  db.query(query, [estado_prueba, id], (err, result) => {
+    if (err) {
+      console.error('Error al actualizar estado:', err);
+      return res.status(500).json({ message: 'Error al actualizar el estado' });
+    }
+    res.status(200).json({ message: 'Estado actualizado correctamente' });
+  });
+});
 
 // Ruta para actualizar un registro técnico
 app.put('/registros/:id', (req, res) => {
   const registroId = req.params.id; // Obtén el ID del registro a actualizar
-  const { material, producto, fecha_prueba, estado_prueba } = req.body; // Datos actualizados
+  const { presion, temperatura, fecha_prueba, observaciones } = req.body; // Datos actualizados
+
+  // Formatear la fecha para MySQL
+  let formattedFechaPrueba;
+  if (fecha_prueba) {
+    const date = new Date(fecha_prueba);
+    formattedFechaPrueba = date.toISOString().split('T')[0]; // Para DATE (YYYY-MM-DD)
+    // Si la columna es DATETIME, usa:
+    // formattedFechaPrueba = date.toISOString().replace('T', ' ').split('.')[0]; // Para DATETIME (YYYY-MM-DD HH:mm:ss)
+  } else {
+    return res.status(400).json({ message: 'El campo fecha_prueba es obligatorio' });
+  }
 
   const query = `
     UPDATE registros_tecnicos
-    SET material = ?, producto = ?, fecha_prueba = ?, estado_prueba = ?
+    SET presion = ?, temperatura = ?, fecha_prueba = ?, observaciones = ?
     WHERE id = ?
   `;
 
-  db.query(query, [material, producto, fecha_prueba, estado_prueba, registroId], (err, result) => {
+  db.query(query, [presion, temperatura, formattedFechaPrueba, observaciones, registroId], (err, result) => {
     if (err) {
       console.error('Error al actualizar registro:', err);
       return res.status(500).json({ message: 'Error al actualizar registro' });
@@ -230,14 +305,17 @@ app.post('/login', (req, res) => {
 
 
 
+
 // Ruta para enlistar un registro técnico
 app.get('/registros', (req, res) => {
   const query = `
-    SELECT id, material, tipo_tanque, capacidad, anio_fabricacion, 
-           producto, presion, temperatura, fecha_prueba, hora_prueba, 
-           estado_prueba, observaciones, 
-           TO_BASE64(imagenes_base64) AS imagen_base64 
-    FROM registros_tecnicos`;
+    SELECT rt.id, rt.material, rt.tipo_tanque, rt.capacidad, rt.anio_fabricacion, 
+           rt.producto, rt.presion, rt.temperatura, rt.fecha_prueba, rt.hora_prueba, 
+           rt.estado_prueba, rt.observaciones, 
+           TO_BASE64(rt.imagenes_base64) AS imagen_base64, rt.usuario_nit, 
+           u.razon_social AS cliente_nombre
+    FROM registros_tecnicos rt
+    LEFT JOIN usuario u ON rt.usuario_nit = u.nit`;
 
   db.query(query, (err, results) => {
     if (err) {

@@ -21,7 +21,6 @@ export class RegistroPruebasComponent {
     temperatura: null,
     fechaPrueba: '',
     horaPrueba: '',
-    estadoPrueba: '',
     observaciones: ''
   };
 
@@ -153,7 +152,6 @@ export class RegistroPruebasComponent {
       temperatura: null,
       fechaPrueba: '',
       horaPrueba: '',
-      estadoPrueba: '',
       observaciones: ''
     };
     this.selectedFiles = [];

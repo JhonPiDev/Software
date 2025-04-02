@@ -51,7 +51,11 @@ export class ClienteComponent implements OnInit {
     // Forzar que solo se muestre el botón ATS al seleccionar un cliente
     localStorage.setItem('mostrarTodosBotones', 'false');
 
-    Swal.fire('Cliente Seleccionado', `Cliente: ${cliente.razon_social}`, 'success');
+    Swal.fire({
+      title: `Cliente: ${cliente.razon_social} Seleccionado`,
+      text: ` Es necesario realizar la evaluación ATS para poder continuar.`,
+      icon: 'success'
+    });
   }
 
   verificarClienteSeleccionado() {
