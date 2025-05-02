@@ -49,7 +49,7 @@
     <div class="mt-3 flex space-x-2">
       <button (click)="editarRegistro(registro)" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-300">Editar</button>
       <button (click)="eliminarRegistro(registro.id)" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition duration-300">Eliminar</button>
-      <button *ngIf="!mostrarFormularioEdicion" (click)="exportarRegistroPDF(registro)" class="download-button">
+      <button *ngIf="!mostrarFormularioEdicion && (registro.estado_prueba === 'Aprobado' || registro.estado_prueba === 'Reprobado')" (click)="exportarRegistroPDF(registro)" class="download-button">
         <div class="docs">
           <svg
             viewBox="0 0 24 24"

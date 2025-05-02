@@ -35,6 +35,24 @@ db.connect((err) => {
   console.log('✅ Conectado a MySQL');
 });
 
+// Nuevo endpoint para obtener el resumen de actividad
+app.get('/api/resumen', (req, res) => {
+  const query = `
+    SELECT 
+      (SELECT COUNT(*) FROM usuario) AS clientes,
+      (SELECT COUNT(*) FROM equipos) AS equipos,
+      (SELECT COUNT(*) FROM registros_tecnicos) AS certificados
+  `;
+
+  db.query(query, (err, result) => {
+    if (err) {
+      console.error('Error al obtener resumen:', err);
+      return res.status(500).json({ message: 'Error al obtener el resumen' });
+    }
+    res.status(200).json(result[0]);
+  });
+});
+
 
 // Ruta para registrar información técnica
 app.post('/registros_tecnicos', upload.single('imagen'), (req, res) => {
@@ -532,3 +550,4 @@ app.get('/api/ultimo-ats', (req, res) => {
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
+  

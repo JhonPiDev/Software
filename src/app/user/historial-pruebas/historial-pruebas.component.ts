@@ -39,10 +39,7 @@ export class HistorialPruebasComponent implements OnInit {
   cargarRegistros() {
     this.http.get('http://localhost:3000/registros').subscribe(
       (data: any) => {
-        // Ordenar por ID descendente en el frontend
         this.registros = data.sort((a: any, b: any) => b.id - a.id);
-        // Si tienes una columna fecha_creacion, usa:
-        // this.registros = data.sort((a: any, b: any) => new Date(b.fecha_creacion).getTime() - new Date(a.fecha_creacion).getTime());
         this.filtrarRegistros();
       },
       (error) => console.error('Error al cargar registros', error)
@@ -58,7 +55,7 @@ export class HistorialPruebasComponent implements OnInit {
       (registro.cliente_nombre?.toLowerCase().includes(filtroLower) || '') ||
       (registro.usuario_nit?.toLowerCase().includes(filtroLower) || '')
     );
-    this.paginaActual = 1; // Reiniciar a la primera página al filtrar
+    this.paginaActual = 1;
     this.calcularTotalPaginas();
   }
 
@@ -154,7 +151,7 @@ export class HistorialPruebasComponent implements OnInit {
         this.http.delete(`http://localhost:3000/registros/${id}`).subscribe(
           () => {
             this.registros = this.registros.filter(r => r.id !== id);
-            this.filtrarRegistros(); // Actualizar la lista filtrada y la paginación
+            this.filtrarRegistros();
             Swal.fire({ icon: 'success', title: 'Eliminado', text: 'El registro se ha eliminado correctamente' });
           },
           (error) => Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo eliminar el registro' })
@@ -172,85 +169,190 @@ export class HistorialPruebasComponent implements OnInit {
   // Exportar un solo registro a PDF
   exportarRegistroPDF(registro: any) {
     const doc = new jsPDF();
+    
+    // Helper function to add header and footer
+    const addHeaderFooter = (page: number, totalPages: number) => {
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      doc.setTextColor(150);
+      // Header
+      doc.text('Empresa de Servicios para Islas de Gasolinerías', 20, 10);
+      doc.text(`Reporte: Registro #${registro.id}`, 190, 10, { align: 'right' });
+      // Footer
+      doc.text(`Página ${page} de ${totalPages}`, 190, 287, { align: 'right' });
+      doc.text(`Generado el: ${new Date().toLocaleDateString()}`, 20, 287);
+    };
+
+    // Cover Page
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(20);
+    doc.setFontSize(24);
     doc.setTextColor(0, 102, 204);
-    doc.text('Registro de Prueba Hidrostática', 105, 20, { align: 'center' });
+    doc.text('Reporte de Prueba Hidrostática', 105, 50, { align: 'center' });
+    doc.setFontSize(16);
+    doc.text(`Registro #${registro.id}`, 105, 65, { align: 'center' });
+    doc.setFont('helvetica', 'normal');
     doc.setFontSize(12);
     doc.setTextColor(0, 0, 0);
-    doc.text('Informe Individual', 105, 28, { align: 'center' });
+    doc.text('Empresa de Servicios para Islas de Gasolinerías', 105, 100, { align: 'center' });
+    doc.text('NIT: 123456789-0', 105, 110, { align: 'center' });
+    doc.text('Carrera 123 #45-67, Bogotá, Colombia', 105, 120, { align: 'center' });
+    doc.text(`Fecha de Generación: ${new Date().toLocaleDateString()}`, 105, 130, { align: 'center' });
+    doc.setFontSize(10);
+    doc.text('Preparado para:', 105, 150, { align: 'center' });
+    doc.text(registro.cliente_nombre || 'No especificado', 105, 160, { align: 'center' });
+    doc.text(`NIT: ${registro.usuario_nit || 'No especificado'}`, 105, 170, { align: 'center' });
+    // Placeholder for logo (optional, add your base64 logo here if available)
+    // doc.addImage(logoBase64, 'PNG', 80, 180, 50, 50);
+
+    // Table of Contents
+    doc.addPage();
+    let currentPage = 2;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(16);
+    doc.setTextColor(0, 102, 204);
+    doc.text('Índice', 20, 20);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(12);
+    doc.setTextColor(0, 0, 0);
+    const toc = [
+      { title: '1. Información General', page: 3 },
+      { title: '2. Detalles de la Prueba', page: 4 },
+      { title: '3. Observaciones', page: 5 },
+      { title: '4. Imagen de la Prueba', page: 6 }
+    ];
+    toc.forEach((item, index) => {
+      doc.text(item.title, 20, 30 + index * 10);
+      doc.text(`${item.page}`, 190, 30 + index * 10, { align: 'right' });
+      // Add clickable link (requires PDF viewer support)
+      doc.link(20, 30 + index * 10 - 2, 170, 8, { pageNumber: item.page });
+    });
+    addHeaderFooter(currentPage, 6); // Assuming 6 pages for now
+
+    // Section 1: General Information
+    doc.addPage();
+    currentPage++;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(14);
+    doc.setTextColor(0, 102, 204);
+    doc.text('1. Información General', 20, 20);
     doc.setLineWidth(0.5);
     doc.setDrawColor(0, 102, 204);
-    doc.line(20, 32, 190, 32);
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Empresa de Servicios para Islas de Gasolinerías', 20, 40);
+    doc.line(20, 22, 190, 22);
     doc.setFont('helvetica', 'normal');
-    doc.text('NIT: 123456789-0', 20, 46);
-    doc.text('Dirección: Carrera 123 #45-67, Bogotá, Colombia', 20, 52);
-    doc.text(`Fecha de generación: ${new Date().toLocaleDateString()}`, 20, 58);
-
-    const datos = [
+    doc.setFontSize(10);
+    doc.setTextColor(0, 0, 0);
+    const generalInfo = [
       ['N° de Registro', registro.id],
       ['Cliente', registro.cliente_nombre || 'No especificado'],
       ['NIT del Cliente', registro.usuario_nit || 'No especificado'],
-      ['Material', registro.material],
-      ['Tipo de Tanque', registro.tipo_tanque || 'No especificado'],
-      ['Capacidad', registro.capacidad || 'No especificado'],
-      ['Año de Fabricación', registro.anio_fabricacion || 'No especificado'],
-      ['Producto', registro.producto],
-      ['Presión', registro.presion || 'No especificado'],
-      ['Temperatura', registro.temperatura || 'No especificado'],
-      ['Fecha de Prueba', this.formatDate(registro.fecha_prueba)],
-      ['Hora de Prueba', registro.hora_prueba || 'No especificado'],
-      ['Estado', registro.estado_prueba],
+      ['Dirección', 'Carrera 123 #45-67, Bogotá, Colombia'],
+      ['Fecha de Generación', new Date().toLocaleDateString()]
     ];
-
     autoTable(doc, {
-      startY: 70,
+      startY: 30,
       head: [['Campo', 'Valor']],
-      body: datos,
+      body: generalInfo,
       theme: 'striped',
       styles: { fontSize: 10, cellPadding: 2 },
       headStyles: { fillColor: [0, 102, 204], textColor: [255, 255, 255], fontStyle: 'bold' },
       columnStyles: {
         0: { cellWidth: 50, fontStyle: 'bold' },
-        1: { cellWidth: 120 },
-      },
+        1: { cellWidth: 120 }
+      }
     });
+    addHeaderFooter(currentPage, 6);
 
-    let finalY = (doc as any).lastAutoTable.finalY || 70;
+    // Section 2: Test Details
+    doc.addPage();
+    currentPage++;
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(12);
-    doc.setTextColor(0, 0, 0);
-    doc.text('Observaciones:', 20, finalY + 10);
+    doc.setFontSize(14);
+    doc.setTextColor(0, 102, 204);
+    doc.text('2. Detalles de la Prueba', 20, 20);
+    doc.setLineWidth(0.5);
+    doc.setDrawColor(0, 102, 204);
+    doc.line(20, 22, 190, 22);
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(10);
-    const observaciones = doc.splitTextToSize(registro.observaciones || 'Ninguna', 170);
-    doc.text(observaciones, 20, finalY + 16);
+    doc.setTextColor(0, 0, 0);
+    const testDetails = [
+      ['Material', registro.material || 'No especificado'],
+      ['Tipo de Tanque', registro.tipo_tanque || 'No especificado'],
+      ['Capacidad', registro.capacidad || 'No especificado'],
+      ['Año de Fabricación', registro.anio_fabricacion || 'No especificado'],
+      ['Producto', registro.producto || 'No especificado'],
+      ['Presión', registro.presion || 'No especificado'],
+      ['Temperatura', registro.temperatura || 'No especificado'],
+      ['Fecha de Prueba', this.formatDate(registro.fecha_prueba)],
+      ['Hora de Prueba', registro.hora_prueba || 'No especificado'],
+      ['Estado', registro.estado_prueba || 'No especificado']
+    ];
+    autoTable(doc, {
+      startY: 30,
+      head: [['Campo', 'Valor']],
+      body: testDetails,
+      theme: 'striped',
+      styles: { fontSize: 10, cellPadding: 2 },
+      headStyles: { fillColor: [0, 102, 204], textColor: [255, 255, 255], fontStyle: 'bold' },
+      columnStyles: {
+        0: { cellWidth: 50, fontStyle: 'bold' },
+        1: { cellWidth: 120 }
+      }
+    });
+    // Add summary text
+    let finalY = (doc as any).lastAutoTable.finalY || 30;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(12);
+    doc.text('Resumen:', 20, finalY + 10);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    const summaryText = `La prueba hidrostática para el registro #${registro.id} fue realizada con los parámetros indicados. El estado final de la prueba es "${registro.estado_prueba || 'No especificado'}".`;
+    const splitSummary = doc.splitTextToSize(summaryText, 170);
+    doc.text(splitSummary, 20, finalY + 16);
+    addHeaderFooter(currentPage, 6);
 
-    finalY = finalY + 16 + (observaciones.length * 5);
+    // Section 3: Observations
+    doc.addPage();
+    currentPage++;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(14);
+    doc.setTextColor(0, 102, 204);
+    doc.text('3. Observaciones', 20, 20);
+    doc.setLineWidth(0.5);
+    doc.setDrawColor(0, 102, 204);
+    doc.line(20, 22, 190, 22);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.setTextColor(0, 0, 0);
+    const observaciones = doc.splitTextToSize(registro.observaciones || 'Ninguna observación registrada.', 170);
+    doc.text(observaciones, 20, 30);
+    addHeaderFooter(currentPage, 6);
+
+    // Section 4: Image
+    doc.addPage();
+    currentPage++;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(14);
+    doc.setTextColor(0, 102, 204);
+    doc.text('4. Imagen de la Prueba', 20, 20);
+    doc.setLineWidth(0.5);
+    doc.setDrawColor(0, 102, 204);
+    doc.line(20, 22, 190, 22);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.setTextColor(0, 0, 0);
     if (registro.imagen_base64) {
       const imgData = `data:image/png;base64,${registro.imagen_base64}`;
-      doc.addImage(imgData, 'PNG', 55, finalY + 10, 100, 80);
-      doc.setFontSize(10);
+      doc.addImage(imgData, 'PNG', 55, 30, 100, 80);
       doc.setFont('helvetica', 'italic');
-      doc.text('Imagen de la prueba', 105, finalY + 95, { align: 'center' });
+      doc.text('Imagen de la prueba hidrostática', 105, 115, { align: 'center' });
     } else {
-      doc.setFontSize(10);
-      doc.setFont('helvetica', 'normal');
-      doc.text('Sin imagen adjunta', 20, finalY + 10);
+      doc.text('Sin imagen adjunta.', 20, 30);
     }
+    addHeaderFooter(currentPage, 6);
 
-    const pageCount = (doc as any).internal.getNumberOfPages();
-    for (let i = 1; i <= pageCount; i++) {
-      doc.setPage(i);
-      doc.setFontSize(8);
-      doc.setTextColor(150);
-      doc.text(`Página ${i} de ${pageCount}`, 190, 287, { align: 'right' });
-    }
-
-    doc.save(`Registro_${registro.id}.pdf`);
+    // Save the PDF
+    doc.save(`Reporte_Registro_${registro.id}.pdf`);
   }
 
   // Exportar todos los registros a PDF

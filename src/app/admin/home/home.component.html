@@ -1,13 +1,17 @@
 <div class="p-6">
-  <!-- Título de bienvenida -->
-  <h1 class="text-3xl font-bold text-gray-800 mb-4">Bienvenido al Panel de Administración</h1>
+  <!-- Título dinámico con estilo -->
+  <h1 class="text-4xl font-extrabold text-blue-800 mb-4 tracking-tight flex items-center gap-2">
+    <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h4l3-6 4 12 3-6h4" />
+    </svg>
+    ¡Bienvenido al Panel de Administración!
+  </h1>
 
-  <!-- Descripción -->
   <p class="text-gray-600 mb-6">
     Desde aquí puedes gestionar todas las funcionalidades de tu aplicación. Utiliza el menú lateral para navegar entre las diferentes secciones.
   </p>
 
-  <!-- Tarjetas de resumen -->
+  <!-- Tarjetas -->
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
     <!-- Tarjeta 1: Usuarios -->
     <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer">
@@ -20,7 +24,6 @@
           </svg>
       </button>
     </div>
-
 
     <!-- Tarjeta 4: Transacciones -->
     <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer">
@@ -45,16 +48,38 @@
           </svg>
       </button>
     </div>
-
-
-    
   </div>
 
-  <!-- Gráfico de resumen (ajustado) -->
-  <div class="bg-white p-4 rounded-lg shadow-md">
-    <h2 class="text-xl font-semibold text-gray-800 mb-4">Resumen de Actividad</h2>
-    <div class="chart-container" style="position: relative; height: 200px;">
-      <canvas id="activityChart"></canvas>
+  <!-- Resumen de Actividad -->
+  <div class="bg-white p-6 rounded-lg shadow-md">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-xl font-semibold text-gray-800">Resumen de Actividad 📊</h2>
+      <button (click)="toggleResumen()" class="text-sm text-blue-600 hover:underline">
+        Cambiar a {{ mostrarGrafico ? 'vista de texto' : 'gráfico' }}
+      </button>
+    </div>
+
+    <!-- Vista gráfica -->
+    <div *ngIf="mostrarGrafico" class="w-full overflow-x-auto">
+      <div class="min-w-[300px] md:min-w-[600px] lg:min-w-[800px]">
+        <canvas id="activityChart" class="w-full max-w-full h-52"></canvas>
+      </div>
+    </div>
+
+    <!-- Vista de texto -->
+    <div *ngIf="!mostrarGrafico" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="bg-gray-50 p-4 rounded shadow">
+        <p class="text-lg text-gray-600">Clientes Registrados</p>
+        <p class="text-3xl font-bold text-blue-700">{{ clientes }}</p>
+      </div>
+      <div class="bg-gray-50 p-4 rounded shadow">
+        <p class="text-lg text-gray-600">Equipos Registrados</p>
+        <p class="text-3xl font-bold text-green-700">{{ equipos }}</p>
+      </div>
+      <div class="bg-gray-50 p-4 rounded shadow">
+        <p class="text-lg text-gray-600">Certificados Registrados</p>
+        <p class="text-3xl font-bold text-purple-700">{{ certificados }}</p>
+      </div>
     </div>
   </div>
 </div>

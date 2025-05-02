@@ -58,7 +58,7 @@ export const routes: Routes = [
     children: [ 
      { path: 'registros', component: RegistrosComponent }, // Ruta para Inicio del inspectors
      { path: 'homes', component: HomesComponent }, // Ruta para Inicio
-     { path: '', redirectTo: 'homes', pathMatch: 'full' }, // Ruta por defecto
+     { path: '', redirectTo: 'registros', pathMatch: 'full' }, // Ruta por defecto
    ],
  }, // Ruta para inspector (puedes cambiar el componente si es necesario)
   { path: '**', redirectTo: '/login' }, // Ruta comodín para redirigir a login si no existe la ruta
