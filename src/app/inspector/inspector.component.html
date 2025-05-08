@@ -1,69 +1,76 @@
 <div class="flex flex-col h-screen bg-gray-100">
-  <!-- Barra de navegación superior -->
-  <div class="bg-white shadow w-full p-2 flex items-center justify-between">
-    <div class="flex items-center">
-      <!-- Logo y nombre de la aplicación -->
-      <div class="hidden md:flex items-center">
-        <img src="icon.jpg" alt="Logo" class="w-28 h-18 mr-2" />
-        <h2 class="font-bold text-xl text-gray-800">TRUCK SERTVICES SAS</h2>
+  <!-- Barra superior -->
+  <div class="bg-white shadow w-full">
+    <div class="flex items-center justify-between p-2">
+      <div class="flex items-center">
+        <!-- Logo + nombre -->
+        <div class="flex items-center flex-shrink-0">
+          <img src="icon.jpg" alt="Logo" class="w-28 h-18 mr-2" />
+          <h2 class="font-bold text-xl text-gray-800 hidden md:block">TRUCK SERTVICES SAS</h2>
+        </div>
+
+        <!-- Menú horizontal (solo visible entre md y lg) -->
+      <div class="hidden md:flex md:items-center md:space-x-6 lg:hidden">
+        <a class="text-gray-600 py-2 px-3 text-sm rounded hover:bg-cyan-100 hover:text-cyan-800 transition"
+          routerLink="/inspector/registros" routerLinkActive="bg-cyan-100 text-cyan-800">
+          <i class="fas fa-file-alt mr-2"></i>Registro
+        </a>
       </div>
 
-      <!-- Botón para mostrar/ocultar la barra lateral en móviles -->
-      <div class="md:hidden flex items-center">
-        <button (click)="toggleSideNav()">
-          <i class="fas fa-bars text-gray-500 text-lg"></i>
+
+        <!-- Botón hamburguesa (móvil) -->
+        <div class="md:hidden flex items-center">
+          <button (click)="toggleSideNav()" class="focus:outline-none">
+            <i class="fas fa-bars text-gray-500 text-lg"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Perfil y logout -->
+      <div class="space-x-3 flex items-center">
+        <button (click)="showNotifications()">
+          <i class="fas fa-bell text-gray-500 text-lg hover:text-gray-700 transition-colors duration-200"></i>
         </button>
+        <button (click)="showProfile()">
+          <i class="fas fa-user text-gray-500 text-lg hover:text-gray-700 transition-colors duration-200"></i>
+        </button>
+        <a (click)="logout()"
+           class="flex items-center bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold text-sm py-2 px-4 rounded-lg shadow-md hover:from-red-600 hover:to-red-700 hover:shadow-lg transform hover:scale-105 transition-all duration-300">
+          <i class="fas fa-sign-out-alt mr-2 transform hover:rotate-12 transition-transform duration-300"></i>
+          Cerrar sesión
+        </a>
       </div>
     </div>
 
-    <!-- Íconos de Notificación y Perfil -->
-    <div class="space-x-5">
-      <button (click)="showNotifications()">
-        <i class="fas fa-bell text-gray-500 text-lg"></i>
-      </button>
-      <button (click)="showProfile()">
-        <i class="fas fa-user text-gray-500 text-lg"></i>
-      </button>
+    <!-- Menú móvil (visible si isSideNavVisible es true) -->
+    <div class="md:hidden bg-white shadow" [class.hidden]="!isSideNavVisible">
+      <nav class="space-y-2 px-4 pb-4">
+        <!-- ESTE BOTÓN DEBE ELIMINARSE SI NO QUIERES QUE APAREZCA EN MÓVIL -->
+    <!--
+    <a class="block text-gray-600 py-2 px-3 text-sm rounded hover:bg-cyan-100 hover:text-cyan-800 transition"
+       routerLink="/inspector/registros" routerLinkActive="bg-cyan-100 text-cyan-800" (click)="toggleSideNav()">
+      <i class="fas fa-file-alt mr-2"></i>Registro
+    </a>
+    -->
+      </nav>
     </div>
   </div>
 
   <!-- Contenido principal -->
-  <div class="flex-1 flex" 
-  >
-    <!-- Barra lateral de navegación -->
-    <div
-      class="p-1 bg-white w-60 flex flex-col fixed md:relative  transform transition-transform duration-300 ease-in-out"
-      [class.-translate-x-full]="!isSideNavVisible"
-      [class.md:translate-x-0]="true"
-    >
-      <nav class=" p-4 rounded-lg ">
-        
-        <a
-          class="block text-gray-500 py-2.5 px-4 my-4 rounded transition duration-200 hover:bg-gradient-to-r hover:from-cyan-400 hover:to-cyan-300 hover:text-white"
-          routerLink="/inspector/registros"
-          routerLinkActive="bg-gradient-to-r from-cyan-400 to-cyan-300 text-white"
-        >
+  <div class="flex-1 flex">
+    <!-- Sidebar grande (lg) -->
+    <div class="hidden lg:flex lg:w-48 lg:flex-col lg:bg-white lg:p-2 lg:h-[calc(100vh-64px)] lg:overflow-y-auto">
+      <nav class="space-y-2">
+        <a class="block text-gray-600 py-2 px-3 text-sm rounded hover:bg-cyan-100 hover:text-cyan-800 transition"
+           routerLink="/inspector/registros" routerLinkActive="bg-cyan-100 text-cyan-800">
           <i class="fas fa-file-alt mr-2"></i>Registro
         </a>
       </nav>
-
-      <!-- Cerrar Sesión -->
-      <a
-        class="block text-gray-500 py-2.5 px-4 my-4 rounded transition duration-200 hover:bg-gradient-to-r hover:from-cyan-400 hover:to-cyan-300 hover:text-white"
-        (click)="logout()"
-      >
-        <i class="fas fa-sign-out-alt mr-2"></i>Cerrar sesión
-      </a>
-
-      <!-- Línea de gradiente -->
-      <div class="bg-gradient-to-r from-cyan-300 to-cyan-500 h-px mt-2"> </div>
     </div>
 
-    <!-- Área de contenido principal -->
-    <div class="flex-1 p-5 overflow-y-auto">
+    <!-- Área de contenido -->
+    <div class="flex-1 p-4 bg-gray-100 overflow-y-auto">
       <router-outlet></router-outlet>
-      
-      <!-- Aquí se cargarán los componentes hijos -->
     </div>
   </div>
 </div>

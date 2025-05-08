@@ -2,81 +2,53 @@
   <h2 class="text-lg font-semibold mb-4 text-center">Historial de ATS</h2>
 
   <div class="overflow-x-auto">
-    <table class="table-auto w-full border-collapse border border-gray-300">
+    <table class="min-w-full text-sm border border-gray-300">
       <thead>
         <tr class="bg-blue-500 text-white">
+          <th class="px-3 py-2 border">NIT del Cliente</th>
+          <th class="px-3 py-2 border">Nombre del Cliente</th>
           <th class="px-3 py-2 border">Lugar</th>
           <th class="px-3 py-2 border">Fecha</th>
           <th class="px-3 py-2 border">Procedimiento</th>
-          <th class="px-3 py-2 border">Nivel de Ruido</th>
-          <th class="px-3 py-2 border">Material Filo</th>
-          <th class="px-3 py-2 border">Químicos</th>
-          <th class="px-3 py-2 border">Iluminación</th>
-          <th class="px-3 py-2 border">Ventilación</th>
-          <th class="px-3 py-2 border">Caídas</th>
-          <th class="px-3 py-2 border">Gafas de Seguridad</th>
-          <th class="px-3 py-2 border">Arnés</th>
-          <th class="px-3 py-2 border">Guantes</th>
-          <th class="px-3 py-2 border">Casco</th>
+          <th class="px-3 py-2 border text-center">Acciones</th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let item of historialAts; let i = index" 
-            [class.bg-gray-50]="i % 2 === 0" [class.bg-white]="i % 2 !== 0">
-          <td class="px-3 py-2 border">{{ item.lugar }}</td>
-          <td class="px-3 py-2 border">{{ item.fecha | date:'dd/MM/yyyy' }}</td>
-          <td class="px-3 py-2 border">{{ item.procedimiento }}</td>
-          <td class="px-3 py-2 border">
-            <span [class.text-green-500]="item.nivel_ruido" [class.text-red-500]="!item.nivel_ruido">
-              {{ item.nivel_ruido ? 'Sí' : 'No' }}
-            </span>
-          </td>
-          <td class="px-3 py-2 border">
-            <span [class.text-green-500]="item.material_filo" [class.text-red-500]="!item.material_filo">
-              {{ item.material_filo ? 'Sí' : 'No' }}
-            </span>
-          </td>
-          <td class="px-3 py-2 border">
-            <span [class.text-green-500]="item.quimicos" [class.text-red-500]="!item.quimicos">
-              {{ item.quimicos ? 'Sí' : 'No' }}
-            </span>
-          </td>
-          <td class="px-3 py-2 border">
-            <span [class.text-green-500]="item.iluminacion" [class.text-red-500]="!item.iluminacion">
-              {{ item.iluminacion ? 'Sí' : 'No' }}
-            </span>
-          </td>
-          <td class="px-3 py-2 border">
-            <span [class.text-green-500]="item.ventilacion" [class.text-red-500]="!item.ventilacion">
-              {{ item.ventilacion ? 'Sí' : 'No' }}
-            </span>
-          </td>
-          <td class="px-3 py-2 border">
-            <span [class.text-green-500]="item.caidas" [class.text-red-500]="!item.caidas">
-              {{ item.caidas ? 'Sí' : 'No' }}
-            </span>
-          </td>
-          <td class="px-3 py-2 border">
-            <span [class.text-green-500]="item.gafas_seguridad" [class.text-red-500]="!item.gafas_seguridad">
-              {{ item.gafas_seguridad ? 'Sí' : 'No' }}
-            </span>
-          </td>
-          <td class="px-3 py-2 border">
-            <span [class.text-green-500]="item.arnes" [class.text-red-500]="!item.arnes">
-              {{ item.arnes ? 'Sí' : 'No' }}
-            </span>
-          </td>
-          <td class="px-3 py-2 border">
-            <span [class.text-green-500]="item.guantes" [class.text-red-500]="!item.guantes">
-              {{ item.guantes ? 'Sí' : 'No' }}
-            </span>
-          </td>
-          <td class="px-3 py-2 border">
-            <span [class.text-green-500]="item.casco" [class.text-red-500]="!item.casco">
-              {{ item.casco ? 'Sí' : 'No' }}
-            </span>
-          </td>
-        </tr>
+        <ng-container *ngFor="let item of historialAts; let i = index">
+          <!-- Fila resumen -->
+          <tr [class.bg-gray-50]="i % 2 === 0" [class.bg-white]="i % 2 !== 0">
+            <td class="px-3 py-2 border">{{ item.usuario_nit }}</td>
+            <td class="px-3 py-2 border">{{ item.razon_social }}</td>
+            <td class="px-3 py-2 border">{{ item.lugar }}</td>
+            <td class="px-3 py-2 border">{{ item.fecha | date:'dd/MM/yyyy' }}</td>
+            <td class="px-3 py-2 border">{{ item.procedimiento }}</td>
+            <td class="px-3 py-2 border text-center">
+              <button (click)="item.mostrarDetalle = !item.mostrarDetalle"
+                class="text-blue-500 hover:text-blue-700 transition">
+                <span *ngIf="!item.mostrarDetalle">▼</span>
+                <span *ngIf="item.mostrarDetalle">▲</span>
+              </button>
+            </td>
+          </tr>
+
+          <!-- Fila detalles -->
+          <tr *ngIf="item.mostrarDetalle">
+            <td colspan="4" class="px-4 py-3 bg-gray-100 border border-t-0 text-sm">
+              <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                <div><strong>Ruido:</strong> <span [class.text-green-600]="item.nivel_ruido" [class.text-red-600]="!item.nivel_ruido">{{ item.nivel_ruido ? '✔️' : '❌' }}</span></div>
+                <div><strong>Material Filo:</strong> <span [class.text-green-600]="item.material_filo" [class.text-red-600]="!item.material_filo">{{ item.material_filo ? '✔️' : '❌' }}</span></div>
+                <div><strong>Químicos:</strong> <span [class.text-green-600]="item.quimicos" [class.text-red-600]="!item.quimicos">{{ item.quimicos ? '✔️' : '❌' }}</span></div>
+                <div><strong>Iluminación:</strong> <span [class.text-green-600]="item.iluminacion" [class.text-red-600]="!item.iluminacion">{{ item.iluminacion ? '✔️' : '❌' }}</span></div>
+                <div><strong>Ventilación:</strong> <span [class.text-green-600]="item.ventilacion" [class.text-red-600]="!item.ventilacion">{{ item.ventilacion ? '✔️' : '❌' }}</span></div>
+                <div><strong>Caídas:</strong> <span [class.text-green-600]="item.caidas" [class.text-red-600]="!item.caidas">{{ item.caidas ? '✔️' : '❌' }}</span></div>
+                <div><strong>Gafas Seguridad:</strong> <span [class.text-green-600]="item.gafas_seguridad" [class.text-red-600]="!item.gafas_seguridad">{{ item.gafas_seguridad ? '✔️' : '❌' }}</span></div>
+                <div><strong>Arnés:</strong> <span [class.text-green-600]="item.arnes" [class.text-red-600]="!item.arnes">{{ item.arnes ? '✔️' : '❌' }}</span></div>
+                <div><strong>Guantes:</strong> <span [class.text-green-600]="item.guantes" [class.text-red-600]="!item.guantes">{{ item.guantes ? '✔️' : '❌' }}</span></div>
+                <div><strong>Casco:</strong> <span [class.text-green-600]="item.casco" [class.text-red-600]="!item.casco">{{ item.casco ? '✔️' : '❌' }}</span></div>
+              </div>
+            </td>
+          </tr>
+        </ng-container>
       </tbody>
     </table>
   </div>

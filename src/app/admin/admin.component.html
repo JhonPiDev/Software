@@ -37,15 +37,23 @@
         </div>
       </div>
 
-      <!-- Íconos de perfil y botón de cerrar sesión -->
-      <div class="space-x-3 flex items-center">
+      <!-- Íconos de perfil y botones de sesión -->
+      <div class="space-x-2 flex items-center">
+        <!-- Botón Inicio SOLO en móviles -->
+        <a
+          class="md:hidden flex items-center bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold text-sm py-2 px-3 rounded-lg shadow-md hover:from-blue-600 hover:to-blue-700 hover:shadow-lg transform hover:scale-105 transition-all duration-300"
+          routerLink="/admin/home">
+          <i class="fas fa-home mr-2"></i>Inicio
+        </a>
+
         <button (click)="showNotifications()">
           <i class="fas fa-bell text-gray-500 text-lg hover:text-gray-700 transition-colors duration-200"></i>
         </button>
         <button (click)="showProfile()">
           <i class="fas fa-user text-gray-500 text-lg hover:text-gray-700 transition-colors duration-200"></i>
         </button>
-        <!-- Botón de cerrar sesión con diseño mejorado -->
+
+        <!-- Botón de cerrar sesión -->
         <a (click)="logout()"
            class="flex items-center bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold text-sm py-2 px-4 rounded-lg shadow-md hover:from-red-600 hover:to-red-700 hover:shadow-lg transform hover:scale-105 transition-all duration-300">
           <i class="fas fa-sign-out-alt mr-2 transform hover:rotate-12 transition-transform duration-300"></i>
@@ -83,19 +91,19 @@
     <div class="hidden lg:flex lg:w-48 lg:flex-col lg:bg-white lg:p-2 lg:h-[calc(100vh-64px)] lg:overflow-y-auto">
       <nav class="space-y-2">
         <a class="block text-gray-600 py-2 px-3 text-sm rounded hover:bg-cyan-100 hover:text-cyan-800 transition"
-          routerLink="/admin/home" routerLinkActive="bg-cyan-100 text-cyan-800">
+           routerLink="/admin/home" routerLinkActive="bg-cyan-100 text-cyan-800">
           <i class="fas fa-home mr-2"></i>Inicio
         </a>
         <a class="block text-gray-600 py-2 px-3 text-sm rounded hover:bg-cyan-100 hover:text-cyan-800 transition"
-          routerLink="/admin/users" routerLinkActive="bg-cyan-100 text-cyan-800">
+           routerLink="/admin/users" routerLinkActive="bg-cyan-100 text-cyan-800">
           <i class="fas fa-users mr-2"></i>Usuarios
         </a>
         <a class="block text-gray-600 py-2 px-3 text-sm rounded hover:bg-cyan-100 hover:text-cyan-800 transition"
-          routerLink="/admin/team" routerLinkActive="bg-cyan-100 text-cyan-800">
+           routerLink="/admin/team" routerLinkActive="bg-cyan-100 text-cyan-800">
           <i class="fas fa-cogs mr-2"></i>Equipos
         </a>
         <a class="block text-gray-600 py-2 px-3 text-sm rounded hover:bg-cyan-100 hover:text-cyan-800 transition"
-          routerLink="/admin/register" routerLinkActive="bg-cyan-100 text-cyan-800">
+           routerLink="/admin/register" routerLinkActive="bg-cyan-100 text-cyan-800">
           <i class="fas fa-user-plus mr-2"></i>Registro
         </a>
       </nav>

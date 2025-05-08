@@ -4,8 +4,9 @@ const mysql = require('mysql2');
 const cors = require('cors');
 const router = express.Router();
 const multer = require('multer');
-
- // Asegúrate de instalar bcrypt con npm install bcrypt
+const { jsPDF } = require('jspdf');
+const { autoTable } = require('jspdf-autotable');
+const path = require('path');
 
 const app = express();
 const port = 3000;
@@ -35,6 +36,8 @@ db.connect((err) => {
   console.log('✅ Conectado a MySQL');
 });
 
+
+
 // Nuevo endpoint para obtener el resumen de actividad
 app.get('/api/resumen', (req, res) => {
   const query = `
@@ -55,7 +58,7 @@ app.get('/api/resumen', (req, res) => {
 
 
 // Ruta para registrar información técnica
-app.post('/registros_tecnicos', upload.single('imagen'), (req, res) => {
+app.post('/registros_tecnicos', upload.array('imagenes'), (req, res) => {
   console.log('📩 Datos recibidos:', req.body);
   console.log('📸 Imágenes recibidas:', req.files);
 
@@ -72,36 +75,68 @@ app.post('/registros_tecnicos', upload.single('imagen'), (req, res) => {
     return res.status(400).json({ message: 'Todos los campos obligatorios deben estar completos.' });
   }
 
-  // 🔹 Convertir imágenes a Base64 solo si existen
-  let imagenesBase64 = null;
-  if (req.files && req.files.length > 0) {
-    imagenesBase64 = JSON.stringify(req.files.map(file => file.buffer.toString('base64')));
+  // 🔍 Validación: Limitar a máximo 10 imágenes
+  if (req.files && req.files.length > 10) {
+    return res.status(400).json({ message: 'Solo se permiten un máximo de 10 imágenes.' });
   }
-  const imagenBuffer = req.file ? req.file.buffer : null; // Convertir la imagen a binario
 
-  // 🛠 SQL para insertar en la base de datos
-  const sql = `
+  // 🛠 SQL para insertar en la tabla registros_tecnicos
+  const sqlRegistro = `
     INSERT INTO registros_tecnicos 
     (usuario_id, material, tipo_tanque, capacidad, anio_fabricacion, producto, 
-    presion, temperatura, fecha_prueba, hora_prueba, observaciones, imagenes_base64, usuario_nit, equipo_id) 
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    presion, temperatura, fecha_prueba, hora_prueba, observaciones, usuario_nit, equipo_id) 
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
-  const values = [
+  const valuesRegistro = [
     userId, material, tipoTanque, capacidad, anioFabricacion,
     producto, presion, temperatura, fechaPrueba, horaPrueba, observaciones,
-    imagenBuffer, // Si no hay imágenes, será NULL
     selectedNit, selectedTankId
   ];
 
-  // 🔥 Guardar en la base de datos
-  db.query(sql, values, (err, result) => {
+  // 🔥 Guardar el registro técnico en la base de datos
+  db.query(sqlRegistro, valuesRegistro, (err, result) => {
     if (err) {
       console.error('❌ Error al insertar en MySQL:', err);
       return res.status(500).json({ message: 'Error al guardar en la base de datos.' });
     }
-    console.log('✅ Registro guardado con éxito:', result);
-    res.status(201).json({ message: 'Registro guardado correctamente.', id: result.insertId });
+
+    const registroTecnicoId = result.insertId; // Obtener el ID del registro técnico insertado
+
+    // 🔹 Insertar imágenes en la tabla imagenes_registro si existen
+    if (req.files && req.files.length > 0) {
+      const sqlImagenes = `
+        INSERT INTO imagenes_registro (registro_tecnico_id, imagen_base64) 
+        VALUES (?, ?)
+      `;
+
+      const imagenesPromises = req.files.map(file => {
+        const imagenBase64 = file.buffer.toString('base64');
+        return new Promise((resolve, reject) => {
+          db.query(sqlImagenes, [registroTecnicoId, imagenBase64], (err, result) => {
+            if (err) {
+              console.error('❌ Error al insertar imagen en MySQL:', err);
+              return reject(err);
+            }
+            resolve(result);
+          });
+        });
+      });
+
+      // Esperar a que todas las imágenes se guarden
+      Promise.all(imagenesPromises)
+        .then(() => {
+          console.log('✅ Registro y sus imágenes guardados con éxito');
+          res.status(201).json({ message: 'Registro y sus imágenes guardados correctamente.', id: registroTecnicoId });
+        })
+        .catch(err => {
+          console.error('❌ Error al guardar imágenes:', err);
+          res.status(500).json({ message: 'Error al guardar las imágenes.' });
+        });
+    } else {
+      console.log('✅ Registro guardado sin imágenes');
+      res.status(201).json({ message: 'Registro guardado correctamente.', id: registroTecnicoId });
+    }
   });
 });
 
@@ -152,23 +187,29 @@ app.get('/registros_tecnicos', (req, res) => {
     });
   });
 });
+
 // Endpoint para actualizar el estado de un registro
 app.put('/registros_tecnicos/:id', (req, res) => {
   const { id } = req.params;
-  const { estado_prueba } = req.body;
+  const { estado_prueba, firma_inspector, inspector_id } = req.body;
+
+  const fecha_revision = new Date(); // Fecha actual
 
   const query = `
-    UPDATE registros_tecnicos SET estado_prueba = ? WHERE id = ?
+    UPDATE registros_tecnicos 
+    SET estado_prueba = ?, firma_inspector = ?, inspector_id = ?, fecha_revision = ?
+    WHERE id = ?
   `;
 
-  db.query(query, [estado_prueba, id], (err, result) => {
+  db.query(query, [estado_prueba, firma_inspector, inspector_id, fecha_revision, id], (err, result) => {
     if (err) {
-      console.error('Error al actualizar estado:', err);
-      return res.status(500).json({ message: 'Error al actualizar el estado' });
+      console.error('Error al actualizar el estado del registro:', err);
+      return res.status(500).json({ message: 'Error en la base de datos' });
     }
-    res.status(200).json({ message: 'Estado actualizado correctamente' });
+    res.status(200).json({ message: 'Registro actualizado correctamente' });
   });
 });
+
 
 // Ruta para actualizar un registro técnico
 app.put('/registros/:id', (req, res) => {
@@ -234,16 +275,16 @@ app.post('/register', async (req, res) => {
 
 // ** Ruta para registrar un cliente **
 app.post('/agregar', async (req, res) => {
-  const { nit, razonSocial, direccion, telefono, establecimiento } = req.body;
+  const { nit, razonSocial, direccion, telefono, establecimiento, correo  } = req.body;
 
-  if (!nit || !razonSocial || !direccion || !telefono || !establecimiento) {
+  if (!nit || !razonSocial || !direccion  || !telefono || !establecimiento || !correo) {
     return res.status(400).json({ message: 'Todos los campos son obligatorios' });
   }
 
   try {
     // Insertar el cliente en la base de datos
-    const query = 'INSERT INTO usuario (nit, razon_social, direccion, telefono, establecimiento) VALUES (?, ?, ?, ?, ?)';
-    db.query(query, [nit, razonSocial, direccion, telefono, establecimiento], (err, result) => {
+    const query = 'INSERT INTO usuario (nit, razon_social, direccion, telefono, establecimiento, correo) VALUES (?, ?, ?, ?, ?,?)';
+    db.query(query, [nit, razonSocial, direccion, telefono, establecimiento, correo], (err, result) => {
       if (err) {
         console.error('Error al registrar el cliente:', err);
         return res.status(500).json({ message: 'Error al registrar el cliente' });
@@ -258,7 +299,7 @@ app.post('/agregar', async (req, res) => {
 
 // ** Ruta para obtener la lista de clientes **
 app.get('/cliente', (req, res) => {
-  const query = 'SELECT nit, razon_social, direccion, telefono, establecimiento FROM usuario'; // Solo selecciona los campos necesarios
+  const query = 'SELECT nit, razon_social, direccion, telefono, establecimiento, correo FROM usuario'; // Solo selecciona los campos necesarios
   db.query(query, (err, results) => {
     if (err) {
       console.error('Error al obtener clientes:', err);
@@ -285,7 +326,6 @@ app.delete('/cliente/:nit', (req, res) => {
     res.json({ message: 'Cliente eliminado correctamente' });
   });
 });
-
 
 // Ruta para manejar el login
 app.post('/login', (req, res) => {
@@ -321,30 +361,73 @@ app.post('/login', (req, res) => {
 });
 
 
-
-
-
 // Ruta para enlistar un registro técnico
 app.get('/registros', (req, res) => {
+  // Consulta principal para obtener los registros técnicos
   const query = `
-    SELECT rt.id, rt.material, rt.tipo_tanque, rt.capacidad, rt.anio_fabricacion, 
-           rt.producto, rt.presion, rt.temperatura, rt.fecha_prueba, rt.hora_prueba, 
-           rt.estado_prueba, rt.observaciones, 
-           TO_BASE64(rt.imagenes_base64) AS imagen_base64, rt.usuario_nit, 
-           u.razon_social AS cliente_nombre
-    FROM registros_tecnicos rt
-    LEFT JOIN usuario u ON rt.usuario_nit = u.nit`;
+   SELECT 
+  rt.id, rt.material, rt.tipo_tanque, rt.capacidad, rt.anio_fabricacion, 
+  rt.producto, rt.presion, rt.temperatura, rt.fecha_prueba, rt.hora_prueba, 
+  rt.estado_prueba, rt.observaciones, rt.usuario_nit, rt.equipo_id,firma_inspector,
+  e.idtanque AS idtanque, -- ← Este es el campo que necesitas
+  e.fabricante AS fabricante,
+  u.razon_social AS cliente_nombre,
+  u.direccion AS cliente_direccion,
+  u.correo AS cliente_correo
+  FROM registros_tecnicos rt
+  LEFT JOIN usuario u ON rt.usuario_nit = u.nit
+  LEFT JOIN equipos e ON rt.equipo_id = e.id;
 
+  `;
+
+  // Consulta para obtener las imágenes asociadas
+  const imagesQuery = `
+    SELECT 
+      ir.registro_tecnico_id,
+      ir.imagen_base64
+    FROM imagenes_registro ir
+    WHERE ir.registro_tecnico_id IN (?)
+  `;
+
+  // Primero, obtener todos los registros
   db.query(query, (err, results) => {
     if (err) {
       console.error('Error al obtener historial:', err);
       return res.status(500).json({ message: 'Error al obtener historial' });
     }
 
-    res.json(results);
+    // Extraer los IDs de los registros
+    const registroIds = results.map(registro => registro.id);
+
+    // Si no hay registros, devolver el array vacío
+    if (registroIds.length === 0) {
+      return res.json([]);
+    }
+
+    // Obtener las imágenes asociadas a los registros
+    db.query(imagesQuery, [registroIds], (err, imagesResults) => {
+      if (err) {
+        console.error('Error al obtener imágenes:', err);
+        return res.status(500).json({ message: 'Error al obtener las imágenes' });
+      }
+
+      // Asociar las imágenes a los registros
+      const registrosConImagenes = results.map(registro => {
+        const imagenesRelacionadas = imagesResults
+          .filter(image => image.registro_tecnico_id === registro.id)
+          .map(image => image.imagen_base64);
+        return {
+          ...registro,
+          imagenes: imagenesRelacionadas.length > 0 ? imagenesRelacionadas : [],
+          imagen_base64: imagenesRelacionadas.length > 0 ? imagenesRelacionadas[0] : null // Para compatibilidad con el HTML actual
+        };
+      });
+
+      console.log('Registros con imágenes:', registrosConImagenes); // Log para depurar
+      res.json(registrosConImagenes);
+    });
   });
 });
-
 
 // Ruta para eliminar un registro técnico
 app.delete('/registros/:id', (req, res) => {
@@ -407,7 +490,9 @@ app.get('/equipos', (req, res) => {
       capacidad, 
       anio_fabricacion AS anioFabricacion, 
       producto, 
-      DATE_FORMAT(fecha_registro, '%Y-%m-%d %H:%i:%s') AS fechaRegistro 
+      DATE_FORMAT(fecha_registro, '%Y-%m-%d %H:%i:%s') AS fechaRegistro,
+      fabricante, 
+      idtanque AS idTanque
     FROM equipos 
     ORDER BY fecha_registro DESC`;
 
@@ -422,12 +507,33 @@ app.get('/equipos', (req, res) => {
   });
 });
 
+// Actualizar un equipo existente
+app.put('/equipos/:id', (req, res) => {
+  const { id } = req.params;
+  const { material, tipoTanque, capacidad, anioFabricacion, producto, fabricante, idtanque } = req.body;
+
+  const sql = `
+    UPDATE equipos 
+    SET material = ?, tipo_tanque = ?, capacidad = ?, anio_fabricacion = ?, producto = ?, fabricante = ?, idtanque = ?
+    WHERE id = ?
+  `;
+
+  db.query(sql, [material, tipoTanque, capacidad, anioFabricacion, producto, fabricante, idtanque, id], (err, result) => {
+    if (err) {
+      console.error('Error al actualizar el equipo:', err);
+      return res.status(500).send('Error al actualizar el equipo');
+    }
+
+    res.json({ message: 'Equipo actualizado correctamente' });
+  });
+});
+
 
 // Insertar un nuevo equipo
 app.post('/equipos', (req, res) => {
-  const { material, tipoTanque, capacidad, anioFabricacion, producto } = req.body;
-  const sql = "INSERT INTO equipos (material, tipo_tanque, capacidad, anio_fabricacion, producto) VALUES (?, ?, ?, ?, ?)";
-  db.query(sql, [material, tipoTanque, capacidad, anioFabricacion, producto], (err, result) => {
+  const { material, tipoTanque, capacidad, anioFabricacion, producto, fabricante,idtanque } = req.body;
+  const sql = "INSERT INTO equipos (material, tipo_tanque, capacidad, anio_fabricacion, producto, fabricante,idtanque) VALUES (?, ?,?, ?, ?, ?,?)";
+  db.query(sql, [material, tipoTanque, capacidad, anioFabricacion, producto, fabricante,idtanque], (err, result) => {
       if (err) return res.status(500).send(err);
       res.json({ message: 'Equipo registrado', id: result.insertId });
   });
@@ -498,19 +604,16 @@ app.post('/api/ats', (req, res) => {
 });
 // * Ruta para obtener el historial ATS *
 app.get('/api/historial', (req, res) => {
-  const usuario_nit = req.query.nit;
-  if (!usuario_nit) {
-    return res.status(400).json({ message: 'Falta el NIT del cliente' });
-  }
-
   const query = `
-    SELECT id, lugar, fecha, procedimiento, nivel_ruido, material_filo, quimicos, iluminacion, ventilacion, caidas, 
-           gafas_seguridad, arnes, guantes, casco 
-    FROM ats 
-    WHERE usuario_nit = ?
+    SELECT 
+      ats.id, ats.lugar, ats.fecha, ats.procedimiento, ats.nivel_ruido, ats.material_filo, 
+      ats.quimicos, ats.iluminacion, ats.ventilacion, ats.caidas, ats.gafas_seguridad, 
+      ats.arnes, ats.guantes, ats.casco, ats.usuario_nit, usuario.razon_social AS razon_social
+    FROM ats
+    JOIN usuario ON ats.usuario_nit = usuario.nit
   `;
 
-  db.query(query, [usuario_nit], (err, results) => {
+  db.query(query, (err, results) => {
     if (err) {
       console.error('Error al obtener los ATS:', err);
       return res.status(500).json({ message: 'Error al obtener los ATS' });
@@ -547,7 +650,7 @@ app.get('/api/ultimo-ats', (req, res) => {
 });
 
 // Inicia el servidor
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+app.listen(port, '0.0.0.0', () => {
+  console.log(`Servidor corriendo en ${port}`);
 });
   

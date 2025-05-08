@@ -30,6 +30,9 @@
     <div class="grid grid-cols-2 gap-2">
       <p><strong>Cliente:</strong> {{ registro.cliente_nombre || 'No especificado' }}</p>
       <p><strong>NIT del Cliente:</strong> {{ registro.usuario_nit || 'No especificado' }}</p>
+      <p><strong>Direccion:</strong> {{ registro.cliente_direccion|| 'No especificado' }}</p>
+      <p><strong>Correo Electronico:</strong> {{ registro.cliente_correo || 'No especificado' }}</p>
+      <p><strong>Id Tanque:</strong> {{ registro.idtanque || 'No especificado' }}</p>
       <p><strong>Material:</strong> {{ registro.material }}</p>
       <p><strong>Tipo de Tanque:</strong> {{ registro.tipo_tanque || 'No especificado' }}</p>
       <p><strong>Producto:</strong> {{ registro.producto }}</p>
@@ -39,54 +42,42 @@
       <p class="col-span-2"><strong>Observaciones:</strong> {{ registro.observaciones || 'Ninguna' }}</p>
     </div>
     
-    <!-- Mostrar imagen si existe -->
-    <img *ngIf="registro.imagen_base64" 
-         [src]="getImageUrl(registro.imagen_base64)" 
-         alt="Imagen de prueba"
-         class="w-32 h-24 object-cover rounded-lg mt-2 shadow-md">
-     
+    <!-- Mostrar imágenes si existen -->
+    <div class="mt-2">
+      <div *ngIf="registro.imagenes && registro.imagenes.length > 0; else noImage">
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          <img *ngFor="let imagen of registro.imagenes"
+               [src]="getImageUrl(imagen)"
+               alt="Imagen de prueba"
+               class="w-32 h-24 object-cover rounded-lg shadow-md">
+        </div>
+      </div>
+      <ng-template #noImage>
+        <p class="text-gray-500 text-sm">Sin imagen disponible</p>
+      </ng-template>
+    </div>
+
     <!-- Botones de Acción -->
     <div class="mt-3 flex space-x-2">
       <button (click)="editarRegistro(registro)" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-300">Editar</button>
       <button (click)="eliminarRegistro(registro.id)" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition duration-300">Eliminar</button>
-      <button *ngIf="!mostrarFormularioEdicion && (registro.estado_prueba === 'Aprobado' || registro.estado_prueba === 'Reprobado')" (click)="exportarRegistroPDF(registro)" class="download-button">
-        <div class="docs">
-          <svg
-            viewBox="0 0 24 24"
-            width="20"
-            height="20"
-            stroke="currentColor"
-            stroke-width="2"
-            fill="none"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            class="css-i6dzq1"
-          >
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-            <polyline points="14 2 14 8 20 8"></polyline>
-            <line x1="16" y1="13" x2="8" y2="13"></line>
-            <line x1="16" y1="17" x2="8" y2="17"></line>
-            <polyline points="10 9 9 9 8 9"></polyline>
-          </svg>
-          Exportar a PDF
-        </div>
-        <div class="download">
-          <svg
-            viewBox="0 0 24 24"
-            width="24"
-            height="24"
-            stroke="currentColor"
-            stroke-width="2"
-            fill="none"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            class="css-i6dzq1"
-          >
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-            <polyline points="7 10 12 15 17 10"></polyline>
-            <line x1="12" y1="15" x2="12" y2="3"></line>
-          </svg>
-        </div>
+      <button
+        *ngIf="!mostrarFormularioEdicion && (registro.estado_prueba === 'Aprobado' || registro.estado_prueba === 'Reprobado')"
+        (click)="exportarRegistroPDF(registro)"
+        class="uiverse-btn"
+      >
+        <svg
+          viewBox="0 0 256 256"
+          height="32"
+          width="38"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M74.34 85.66a8 8 0 0 1 11.32-11.32L120 108.69V24a8 8 0 0 1 16 0v84.69l34.34-34.35a8 8 0 0 1 11.32 11.32l-48 48a8 8 0 0 1-11.32 0ZM240 136v64a16 16 0 0 1-16 16H32a16 16 0 0 1-16-16v-64a16 16 0 0 1 16-16h52.4a4 4 0 0 1 2.83 1.17L111 145a24 24 0 0 0 34 0l23.8-23.8a4 4 0 0 1 2.8-1.2H224a16 16 0 0 1 16 16m-40 32a12 12 0 1 0-12 12a12 12 0 0 0 12-12"
+            fill="currentColor"
+          ></path>
+        </svg>
+        Exportar a PDF
       </button>
     </div>
   </div>

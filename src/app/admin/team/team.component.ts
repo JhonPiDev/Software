@@ -20,11 +20,13 @@ export class TeamComponent implements OnInit {
   equipoIdEdicion: number | null = null;
 
   nuevoEquipo = {
+    idtanque: '',
     material: '',
     tipoTanque: '',
     capacidad: null,
     anioFabricacion: null,
-    producto: ''
+    producto: '',
+    fabricante: null
   };
 
   constructor(private http: HttpClient) {}
@@ -117,8 +119,9 @@ export class TeamComponent implements OnInit {
     });
   }
   resetFormulario() {
-    this.nuevoEquipo = { material: '', tipoTanque: '', capacidad: null, anioFabricacion: null, producto: '' };
+    this.nuevoEquipo = {idtanque: '', material: '', tipoTanque: '', capacidad: null, anioFabricacion: null, producto: '', fabricante: null };
     this.editando = false;
     this.equipoIdEdicion = null;
+    this.isModalOpen = false; // Cierra el modal al resetear el formulario
   }
 }

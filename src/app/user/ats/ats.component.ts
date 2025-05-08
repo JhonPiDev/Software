@@ -23,13 +23,13 @@ export class ATSComponent implements OnInit {
       lugar: ['', Validators.required],
       fecha: [{ value: fechaActual, disabled: true }, Validators.required],
       procedimiento: ['', Validators.required],
-      nivelRuido: [false],
-      materialFilo: [false],
+      nivel_ruido: [false],
+      material_filo: [false],
       quimicos: [false],
       iluminacion: [false],
       ventilacion: [false],
       caidas: [false],
-      gafasSeguridad: [false],
+      gafas_seguridad: [false],
       arnes: [false],
       guantes: [false],
       casco: [false],
@@ -84,15 +84,15 @@ export class ATSComponent implements OnInit {
 
   validarATS(): boolean {
     const riesgos = {
-      nivelRuido: this.ATSForm.get('nivelRuido')?.value,
-      materialFilo: this.ATSForm.get('materialFilo')?.value,
+      nivel_ruido: this.ATSForm.get('nivel_ruido')?.value,
+      material_filo: this.ATSForm.get('material_filo')?.value,
       quimicos: this.ATSForm.get('quimicos')?.value,
       iluminacion: this.ATSForm.get('iluminacion')?.value,
       ventilacion: this.ATSForm.get('ventilacion')?.value,
       caidas: this.ATSForm.get('caidas')?.value
     };
     const epp = {
-      gafasSeguridad: this.ATSForm.get('gafasSeguridad')?.value,
+      gafas_seguridad: this.ATSForm.get('gafas_seguridad')?.value,
       arnes: this.ATSForm.get('arnes')?.value,
       guantes: this.ATSForm.get('guantes')?.value,
       casco: this.ATSForm.get('casco')?.value
@@ -127,16 +127,16 @@ export class ATSComponent implements OnInit {
     // Validaciones específicas de riesgos y EPP
     let mensajeError = '';
 
-    if (riesgos.nivelRuido && !epp.casco) {
+    if (riesgos.nivel_ruido && !epp.casco) {
       mensajeError = 'El riesgo de nivel de ruido requiere el uso de un casco (con protección auditiva).';
     }
-    if (riesgos.materialFilo && !(epp.guantes && epp.gafasSeguridad)) {
+    if (riesgos.material_filo && !(epp.guantes && epp.gafas_seguridad)) {
       mensajeError = 'El riesgo de material con filo requiere guantes y gafas de seguridad.';
     }
-    if (riesgos.quimicos && !(epp.gafasSeguridad && epp.guantes)) {
+    if (riesgos.quimicos && !(epp.gafas_seguridad && epp.guantes)) {
       mensajeError = 'El riesgo de químicos requiere gafas de seguridad y guantes.';
     }
-    if (riesgos.ventilacion && !epp.gafasSeguridad) {
+    if (riesgos.ventilacion && !epp.gafas_seguridad) {
       mensajeError = 'El riesgo de ventilación inadecuada requiere gafas de seguridad para proteger contra partículas.';
     }
     if (riesgos.caidas && !(epp.arnes && epp.casco)) {
@@ -169,13 +169,13 @@ export class ATSComponent implements OnInit {
       lugar: '',
       fecha: fechaActual,
       procedimiento: '',
-      nivelRuido: false,
-      materialFilo: false,
+      nivel_ruido: false,
+      material_filo: false,
       quimicos: false,
       iluminacion: false,
       ventilacion: false,
       caidas: false,
-      gafasSeguridad: false,
+      gafas_seguridad: false,
       arnes: false,
       guantes: false,
       casco: false,

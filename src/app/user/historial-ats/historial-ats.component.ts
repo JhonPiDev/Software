@@ -5,6 +5,8 @@ import { DatePipe } from '@angular/common';
 import Swal from 'sweetalert2';
 
 interface ATS {
+  usuario_nit: string;
+  razon_social: string;
   id: number;
   lugar: string;
   fecha: string;
@@ -19,6 +21,7 @@ interface ATS {
   arnes: number;
   guantes: number;
   casco: number;
+  mostrarDetalle?: boolean; // ✅ añadida para el toggle
 }
 
 @Component({
@@ -60,8 +63,10 @@ export class HistorialAtsComponent implements OnInit {
     this.http.get<ATS[]>(`http://localhost:3000/api/historial?nit=${nit}`).subscribe({
       next: (data) => {
         if (Array.isArray(data)) {
-          this.historialAts = data;
-          console.log('✅ Historial cargado correctamente:', data);
+          // ✅ Agrega la propiedad mostrarDetalle por cada ítem
+          this.historialAts = data.map(item => ({ ...item, mostrarDetalle: false }));
+          console.log('✅ Historial cargado correctamente:', this.historialAts);
+
           if (data.length === 0) {
             console.log('ℹ️ No hay registros en el historial');
             Swal.fire({

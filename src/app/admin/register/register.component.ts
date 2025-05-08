@@ -24,6 +24,7 @@ export class RegisterComponent implements OnInit {
       nit: ['', [Validators.required, Validators.pattern('^[0-9]+$')]], // Solo números
       razonSocial: ['', Validators.required],
       direccion: ['', Validators.required],
+      correo: ['', Validators.required],
       telefono: ['', [Validators.required, Validators.pattern('^[0-9]+$')]], // Solo números
       establecimiento: ['', Validators.required],
     });

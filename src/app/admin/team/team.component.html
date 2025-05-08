@@ -24,6 +24,12 @@
             <form (submit)="guardarEquipo()">
                 <div class="grid grid-cols-2 gap-4">
                     <div>
+                        <label class="block text-gray-700 font-medium">Id Tanque:</label>
+                        <input type="text"
+                            class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
+                            [(ngModel)]="nuevoEquipo.idtanque" name="idtanque" required>
+                    </div>
+                    <div>
                         <label class="block text-gray-700 font-medium">Material:</label>
                         <input type="text"
                             class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
@@ -42,6 +48,13 @@
                         <input type="number"
                             class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
                             [(ngModel)]="nuevoEquipo.capacidad" name="capacidad" required>
+                    </div>
+
+                    <div>
+                        <label class="block text-gray-700 font-medium">Fabricante:</label>
+                        <input type="text"
+                            class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
+                            [(ngModel)]="nuevoEquipo.fabricante" name="fabricante" required>
                     </div>
 
                     <div>
@@ -80,7 +93,9 @@
         <div *ngFor="let equipo of equipos"
             class="bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg transition duration-300">
             <h3 class="text-lg font-bold text-gray-800">{{ equipo.material }} - {{ equipo.tipoTanque }}</h3>
+            <p class="text-gray-600"><strong>Id Tanque:</strong> {{ equipo.idtanque }}</p>
             <p class="text-gray-600"><strong>Capacidad:</strong> {{ equipo.capacidad }} galones</p>
+            <p class="text-gray-600"><strong>Fabricante:</strong> {{ equipo.fabricante }}</p>
             <p class="text-gray-600"><strong>Año de Fabricación:</strong> {{ equipo.anioFabricacion }}</p>
             <p class="text-gray-600"><strong>Producto:</strong> {{ equipo.producto }}</p>
 

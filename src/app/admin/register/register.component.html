@@ -55,11 +55,23 @@
         />
       </div>
 
+      <!-- Campo de correo -->
+      <div class="mb-4">
+        <label for="correo" class="block text-gray-700 text-sm sm:text-base">Correo</label>
+        <input
+          type="email"
+          id="correo"
+          formControlName="correo"
+          class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 text-sm sm:text-base"
+          placeholder="Ingrese la correo electrónico"
+        />
+      </div>
+
       <!-- Campo de Teléfono -->
       <div class="mb-4">
         <label for="telefono" class="block text-gray-700 text-sm sm:text-base">Teléfono</label>
         <input
-          type="text"
+          type="number"
           id="telefono"
           formControlName="telefono"
           class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 text-sm sm:text-base"
@@ -108,6 +120,7 @@
           <th class="border border-gray-300 px-2 py-2 text-sm sm:text-base">NIT</th>
           <th class="border border-gray-300 px-2 py-2 text-sm sm:text-base">Razón Social</th>
           <th class="border border-gray-300 px-2 py-2 text-sm sm:text-base">Dirección</th>
+          <th class="border border-gray-300 px-2 py-2 text-sm sm:text-base">Correo Electronico</th>
           <th class="border border-gray-300 px-2 py-2 text-sm sm:text-base">Teléfono</th>
           <th class="border border-gray-300 px-2 py-2 text-sm sm:text-base">Establecimiento</th>
           <th class="border border-gray-300 px-2 py-2 text-sm sm:text-base">Acciones</th>
@@ -118,6 +131,7 @@
           <td class="border border-gray-300 px-2 py-2 text-sm sm:text-base">{{ cliente.nit }}</td>
           <td class="border border-gray-300 px-2 py-2 text-sm sm:text-base">{{ cliente.razon_social }}</td>
           <td class="border border-gray-300 px-2 py-2 text-sm sm:text-base">{{ cliente.direccion }}</td>
+          <td class="border border-gray-300 px-2 py-2 text-sm sm:text-base">{{ cliente.correo }}</td>
           <td class="border border-gray-300 px-2 py-2 text-sm sm:text-base">{{ cliente.telefono }}</td>
           <td class="border border-gray-300 px-2 py-2 text-sm sm:text-base">{{ cliente.establecimiento }}</td>
           <td class="border border-gray-300 px-2 py-2 text-sm sm:text-base">

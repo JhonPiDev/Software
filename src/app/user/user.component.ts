@@ -34,7 +34,12 @@ export class UserComponent implements OnInit, OnDestroy {
       this.verificarMostrarBotones();
     });
   }
+  showMenu: boolean = false;
 
+  toggleMenu() {
+    this.showMenu = !this.showMenu;
+  }
+  
   verificarClienteSeleccionado() {
     const nit = localStorage.getItem('nitSeleccionado');
     this.clienteSeleccionado = !!nit; // Si hay un NIT, se muestra el menú

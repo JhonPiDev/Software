@@ -12,6 +12,7 @@ import Swal from 'sweetalert2'; // ✅ Importamos SweetAlert2
   styleUrls: ['./registros.component.scss']
 })
 export class RegistrosComponent implements OnInit {
+  [x: string]: any;
   registros: any[] = [];
   currentPage: number = 1; // Página actual
   totalPages: number = 1; // Número total de páginas
@@ -44,42 +45,44 @@ export class RegistrosComponent implements OnInit {
       }
     });
   }
+  
+
+  cargarFirma(event: any, registro: any) {
+  const file = event.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      registro.firma_inspector = reader.result;
+    };
+    reader.readAsDataURL(file);
+  }
+}
 
   actualizarEstado(registro: any) {
     if (!registro.estado_prueba) {
-      Swal.fire({
-        title: 'Advertencia',
-        text: '⚠ Debes seleccionar un estado (Aprobado o Reprobado).',
-        icon: 'warning',
-        confirmButtonText: 'OK'
-      });
+      Swal.fire({ title: 'Advertencia', text: 'Debes seleccionar un estado.', icon: 'warning' });
       return;
     }
-
-    this.http.put(`http://localhost:3000/registros_tecnicos/${registro.id}`, {
-      estado_prueba: registro.estado_prueba
-    }).subscribe({
-      next: (response: any) => {
-        console.log('✅ Estado actualizado:', response);
-        Swal.fire({
-          title: 'Éxito',
-          text: 'Estado actualizado correctamente.',
-          icon: 'success',
-          confirmButtonText: 'OK'
-        });
-        this.cargarRegistros(); // Recargar los registros después de actualizar
+  
+     // Implementa esto según tu lógica de login
+  
+    const payload = {
+      estado_prueba: registro.estado_prueba,
+      firma_inspector: registro.firma_inspector || null,
+      inspector_id: localStorage.getItem('inspectorId')
+    };
+  
+    this.http.put(`http://localhost:3000/registros_tecnicos/${registro.id}`, payload).subscribe({
+      next: () => {
+        Swal.fire({ title: 'Éxito', text: 'Estado actualizado correctamente.', icon: 'success' });
+        this.cargarRegistros(); // Refresca los datos
       },
-      error: (error) => {
-        console.error('❌ Error al actualizar estado:', error);
-        Swal.fire({
-          title: 'Error',
-          text: 'Hubo un error al actualizar el estado.',
-          icon: 'error',
-          confirmButtonText: 'OK'
-        });
+      error: () => {
+        Swal.fire({ title: 'Error', text: 'Error al actualizar el estado.', icon: 'error' });
       }
     });
   }
+  
 
   // Ir a la página anterior
   previousPage() {

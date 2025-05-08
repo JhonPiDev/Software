@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
+import Swal from 'sweetalert2'; // Asegúrate de importar SweetAlert2
 
 @Component({
   selector: 'app-registro-pruebas',
@@ -16,6 +17,7 @@ export class RegistroPruebasComponent {
     tipoTanque: '',
     capacidad: null,
     producto: '',
+    fabricante: '',
     anioFabricacion: null,
     presion: null,
     temperatura: null,
@@ -24,34 +26,30 @@ export class RegistroPruebasComponent {
     observaciones: ''
   };
 
-  minDate: string = '';  // Fecha mínima permitida (ayer)
+  minDate: string = '';
   maxDate: string = '';
-
-  tanques: any[] = []; // Lista de tanques disponibles
-  selectedTankId: string = ''; // ID del tanque seleccionado
+  tanques: any[] = [];
+  selectedTankId: string = '';
   registroExitoso: boolean = false;
   selectedFiles: File[] = [];
   imagenesVistaPrevia: string[] = [];
 
-  selectedNit: string | null = null; // Variable para almacenar el NIT
+  selectedNit: string | null = null;
 
   constructor(private http: HttpClient) {
-    this.selectedNit = localStorage.getItem('nitSeleccionado'); // Recuperar el NIT guardado
+    this.selectedNit = localStorage.getItem('nitSeleccionado');
     this.cargarTanques();
     this.setDateLimits();
   }
+
   setDateLimits() {
     const today = new Date();
     const yesterday = new Date();
     yesterday.setDate(today.getDate() - 1);
-
-    // Formatear fechas como YYYY-MM-DD para el input type="date"
     this.minDate = yesterday.toISOString().split('T')[0];
     this.maxDate = today.toISOString().split('T')[0];
   }
 
-
-  // 🔹 Cargar tanques desde el backend
   cargarTanques() {
     this.http.get<any[]>('http://localhost:3000/equipos').subscribe({
       next: (response) => {
@@ -63,7 +61,6 @@ export class RegistroPruebasComponent {
     });
   }
 
-  // 🔹 Llenar los campos cuando se selecciona un tanque
   onSelectTank() {
     const tanqueSeleccionado = this.tanques.find(tanque => tanque.id == this.selectedTankId);
     if (tanqueSeleccionado) {
@@ -73,6 +70,7 @@ export class RegistroPruebasComponent {
         tipoTanque: tanqueSeleccionado.tipoTanque || '',
         capacidad: tanqueSeleccionado.capacidad || null,
         producto: tanqueSeleccionado.producto || '',
+        fabricante: tanqueSeleccionado.fabricante || '',
         anioFabricacion: tanqueSeleccionado.anioFabricacion || null,
       };
     } else {
@@ -80,12 +78,21 @@ export class RegistroPruebasComponent {
     }
   }
 
-  // 🔹 Manejar selección de imágenes
+  // ✅ Agrega múltiples imágenes con límite de 10 y genera vista previa
   onFilesSelected(event: any) {
-    this.selectedFiles = [];
-    this.imagenesVistaPrevia = [];
-
     const archivos = Array.from(event.target.files) as File[];
+    const totalFiles = this.selectedFiles.length + archivos.length;
+
+    if (totalFiles > 10) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Límite alcanzado',
+        text: 'Solo se permiten un máximo de 10 imágenes. Selecciona un número menor.',
+        confirmButtonText: 'Aceptar'
+      });
+      event.target.value = ''; // Limpiar el input para evitar procesar archivos excedentes
+      return;
+    }
 
     archivos.forEach((file) => {
       this.selectedFiles.push(file);
@@ -97,10 +104,13 @@ export class RegistroPruebasComponent {
       reader.readAsDataURL(file);
     });
   }
-  userId: string | null = null;
 
+  // ✅ Elimina una imagen por índice
+  eliminarImagen(index: number) {
+    this.selectedFiles.splice(index, 1);
+    this.imagenesVistaPrevia.splice(index, 1);
+  }
 
-  // 🔹 Guardar datos en el backend
   guardarDatos() {
     const userId = localStorage.getItem('userId'); 
     const selectedNit = localStorage.getItem('nitSeleccionado');
@@ -109,21 +119,23 @@ export class RegistroPruebasComponent {
       alert('⚠ Error: No se encontró el usuario o el NIT. Inicia sesión nuevamente.');
       return;
     }
-  
+
     const formData = new FormData();
-  
+
     Object.keys(this.formData).forEach((key) => {
       formData.append(key, (this.formData as any)[key]);
     });
-  
+
     formData.append('userId', userId);
     formData.append('selectedTankId', this.selectedTankId);
     formData.append('selectedNit', selectedNit);
-  
+
     if (this.selectedFiles.length > 0) {
-      formData.append('imagen', this.selectedFiles[0]); // Enviar solo una imagen
+      this.selectedFiles.forEach((file) => {
+        formData.append('imagenes', file);
+      });
     }
-  
+
     this.http.post('http://localhost:3000/registros_tecnicos', formData).subscribe({
       next: (response: any) => {
         console.log('✅ Registro exitoso:', response);
@@ -137,10 +149,7 @@ export class RegistroPruebasComponent {
       },
     });
   }
-  
 
-
-  // 🔹 Reiniciar formulario
   resetForm() {
     this.formData = {
       material: '',
@@ -148,6 +157,7 @@ export class RegistroPruebasComponent {
       capacidad: null,
       producto: '',
       anioFabricacion: null,
+      fabricante: '',
       presion: null,
       temperatura: null,
       fechaPrueba: '',
