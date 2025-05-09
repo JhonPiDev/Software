@@ -1,13 +1,9 @@
 <div class="p-8 bg-white shadow-xl rounded-2xl max-w-4xl mx-auto">
   <!-- Filtro -->
   <div class="mb-4">
-    <input
-      type="text"
-      [(ngModel)]="filtro"
-      (input)="filtrarRegistros()"
+    <input type="text" [(ngModel)]="filtro" (input)="filtrarRegistros()"
       placeholder="Filtrar por Cliente, material o producto..."
-      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
-    />
+      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500" />
   </div>
 
   <!-- Tarjetas de Registros -->
@@ -15,22 +11,60 @@
     <!-- Encabezado de la tarjeta con el estado a la derecha -->
     <div class="flex justify-between items-center mb-2">
       <h3 class="text-lg font-semibold text-gray-800">Registro #{{ registro.id }}</h3>
-      <span 
-        class="estado-prueba px-3 py-1 rounded-full text-sm font-medium text-white"
-        [ngClass]="{
+      <span class="estado-prueba px-3 py-1 rounded-full text-sm font-medium text-white" [ngClass]="{
           'bg-green-500': registro.estado_prueba === 'Aprobado',
           'bg-red-500': registro.estado_prueba === 'Reprobado'
-        }"
-      >
+        }">
         {{ registro.estado_prueba }}
       </span>
     </div>
 
     <!-- Detalles del registro -->
-    <div class="grid grid-cols-2 gap-2">
+    <!-- Para pantallas pequeñas, usando flex -->
+    <div class="flex flex-wrap gap-4 sm:hidden">
+      <div class="w-full">
+        <p><strong>Cliente:</strong> {{ registro.cliente_nombre || 'No especificado' }}</p>
+      </div>
+      <div class="w-full">
+        <p><strong>NIT del Cliente:</strong> {{ registro.usuario_nit || 'No especificado' }}</p>
+      </div>
+      <div class="w-full">
+        <p><strong>Direccion:</strong> {{ registro.cliente_direccion || 'No especificado' }}</p>
+      </div>
+      <div class="w-full">
+        <p><strong>Correo Electronico:</strong> {{ registro.cliente_correo || 'No especificado' }}</p>
+      </div>
+      <div class="w-full">
+        <p><strong>Id Tanque:</strong> {{ registro.idtanque || 'No especificado' }}</p>
+      </div>
+      <div class="w-full">
+        <p><strong>Material:</strong> {{ registro.material }}</p>
+      </div>
+      <div class="w-full">
+        <p><strong>Tipo de Tanque:</strong> {{ registro.tipo_tanque || 'No especificado' }}</p>
+      </div>
+      <div class="w-full">
+        <p><strong>Producto:</strong> {{ registro.producto }}</p>
+      </div>
+      <div class="w-full">
+        <p><strong>Presión:</strong> {{ registro.presion || 'No especificado' }}</p>
+      </div>
+      <div class="w-full">
+        <p><strong>Temperatura:</strong> {{ registro.temperatura || 'No especificado' }}</p>
+      </div>
+      <div class="w-full">
+        <p><strong>Fecha de Prueba:</strong> {{ registro.fecha_prueba | date: 'yyyy-MM-dd' }}</p>
+      </div>
+      <div class="w-full">
+        <p><strong>Observaciones:</strong> {{ registro.observaciones || 'Ninguna' }}</p>
+      </div>
+    </div>
+
+    <!-- Para pantallas grandes, usando grid -->
+    <div class="grid grid-cols-2 gap-2 hidden sm:grid">
       <p><strong>Cliente:</strong> {{ registro.cliente_nombre || 'No especificado' }}</p>
       <p><strong>NIT del Cliente:</strong> {{ registro.usuario_nit || 'No especificado' }}</p>
-      <p><strong>Direccion:</strong> {{ registro.cliente_direccion|| 'No especificado' }}</p>
+      <p><strong>Direccion:</strong> {{ registro.cliente_direccion || 'No especificado' }}</p>
       <p><strong>Correo Electronico:</strong> {{ registro.cliente_correo || 'No especificado' }}</p>
       <p><strong>Id Tanque:</strong> {{ registro.idtanque || 'No especificado' }}</p>
       <p><strong>Material:</strong> {{ registro.material }}</p>
@@ -41,15 +75,14 @@
       <p><strong>Fecha de Prueba:</strong> {{ registro.fecha_prueba | date: 'yyyy-MM-dd' }}</p>
       <p class="col-span-2"><strong>Observaciones:</strong> {{ registro.observaciones || 'Ninguna' }}</p>
     </div>
-    
+
+
     <!-- Mostrar imágenes si existen -->
     <div class="mt-2">
       <div *ngIf="registro.imagenes && registro.imagenes.length > 0; else noImage">
         <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
-          <img *ngFor="let imagen of registro.imagenes"
-               [src]="getImageUrl(imagen)"
-               alt="Imagen de prueba"
-               class="w-32 h-24 object-cover rounded-lg shadow-md">
+          <img *ngFor="let imagen of registro.imagenes" [src]="getImageUrl(imagen)" alt="Imagen de prueba"
+            class="w-32 h-24 object-cover rounded-lg shadow-md">
         </div>
       </div>
       <ng-template #noImage>
@@ -58,75 +91,74 @@
     </div>
 
     <!-- Botones de Acción -->
-    <div class="mt-3 flex space-x-2">
-      <button (click)="editarRegistro(registro)" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-300">Editar</button>
-      <button (click)="eliminarRegistro(registro.id)" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition duration-300">Eliminar</button>
-      <button
-        *ngIf="!mostrarFormularioEdicion && (registro.estado_prueba === 'Aprobado' || registro.estado_prueba === 'Reprobado')"
-        (click)="exportarRegistroPDF(registro)"
-        class="uiverse-btn"
-      >
-        <svg
-          viewBox="0 0 256 256"
-          height="32"
-          width="38"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M74.34 85.66a8 8 0 0 1 11.32-11.32L120 108.69V24a8 8 0 0 1 16 0v84.69l34.34-34.35a8 8 0 0 1 11.32 11.32l-48 48a8 8 0 0 1-11.32 0ZM240 136v64a16 16 0 0 1-16 16H32a16 16 0 0 1-16-16v-64a16 16 0 0 1 16-16h52.4a4 4 0 0 1 2.83 1.17L111 145a24 24 0 0 0 34 0l23.8-23.8a4 4 0 0 1 2.8-1.2H224a16 16 0 0 1 16 16m-40 32a12 12 0 1 0-12 12a12 12 0 0 0 12-12"
-            fill="currentColor"
-          ></path>
-        </svg>
-        Exportar a PDF
-      </button>
-      <button 
-  *ngIf="!mostrarFormularioEdicion && (registro.estado_prueba === 'Aprobado' || registro.estado_prueba === 'Reprobado')" 
-  class="btn-enviar-correo" 
-  (click)="enviarCorreo(registro)">
-  <div class="svg-wrapper-1">
-    <div class="svg-wrapper">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
-        <path fill="none" d="M0 0h24v24H0z"></path>
-        <path fill="currentColor" d="M1.946 9.315c-.522-.174-.527-.455.01-.634l19.087-6.362c.529-.176.832.12.684.638l-5.454 19.086c-.15.529-.455.547-.679.045L12 14l6-8-8 6-8.054-2.685z"></path>
-      </svg>
-    </div>
-  </div>
-  <span>Enviar Correo</span>
-</button>
+    <!-- Botones de Acción -->
+<div class="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+  <!-- Botón Editar -->
+  <button (click)="editarRegistro(registro)"
+    class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-300">
+    Editar
+  </button>
 
+  <!-- Botón Eliminar -->
+  <button (click)="eliminarRegistro(registro.id)"
+    class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition duration-300">
+    Eliminar
+  </button>
+
+  <!-- Botón Exportar a PDF (con icono visible solo en pantallas grandes) -->
+  <button
+    *ngIf="!mostrarFormularioEdicion && (registro.estado_prueba === 'Aprobado' || registro.estado_prueba === 'Reprobado')"
+    (click)="exportarRegistroPDF(registro)" class="uiverse-btn w-full sm:w-auto text-sm sm:text-base px-2 py-1 sm:px-4 sm:py-2">
+    <!-- Icono visible solo en pantallas grandes -->
+    <svg viewBox="0 0 256 256" height="32" width="38" xmlns="http://www.w3.org/2000/svg" class="hidden sm:block">
+      <path
+        d="M74.34 85.66a8 8 0 0 1 11.32-11.32L120 108.69V24a8 8 0 0 1 16 0v84.69l34.34-34.35a8 8 0 0 1 11.32 11.32l-48 48a8 8 0 0 1-11.32 0ZM240 136v64a16 16 0 0 1-16 16H32a16 16 0 0 1-16-16v-64a16 16 0 0 1 16-16h52.4a4 4 0 0 1 2.83 1.17L111 145a24 24 0 0 0 34 0l23.8-23.8a4 4 0 0 1 2.8-1.2H224a16 16 0 0 1 16 16m-40 32a12 12 0 1 0-12 12a12 12 0 0 0 12-12"
+        fill="currentColor"></path>
+    </svg>
+    Exportar a PDF
+  </button>
+
+  <!-- Botón Enviar Correo (con icono visible solo en pantallas grandes) -->
+  <button
+    *ngIf="!mostrarFormularioEdicion && (registro.estado_prueba === 'Aprobado' || registro.estado_prueba === 'Reprobado')"
+    class="btn-enviar-correo flex items-center justify-center space-x-2 w-full sm:w-auto py-2 px-4 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600 transition duration-300 text-sm sm:text-base sm:py-2 sm:px-4">
+    <!-- Icono visible solo en pantallas grandes -->
+    <div class="svg-wrapper-1">
+      <div class="svg-wrapper">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+          <path fill="none" d="M0 0h24v24H0z"></path>
+          <path fill="currentColor"
+            d="M1.946 9.315c-.522-.174-.527-.455.01-.634l19.087-6.362c.529-.176.832.12.684.638l-5.454 19.086c-.15.529-.455.547-.679.045L12 14l6-8-8 6-8.054-2.685z">
+          </path>
+        </svg>
+      </div>
     </div>
-    
+    <span>Enviar Correo</span>
+  </button>
+</div>
+
+
+
   </div>
 
   <!-- Controles de Paginación -->
   <div class="flex justify-between items-center mt-4">
-    <button 
-      (click)="paginaAnterior()" 
-      [disabled]="paginaActual === 1"
-      class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 disabled:opacity-50 disabled:cursor-not-allowed"
-    >
+    <button (click)="paginaAnterior()" [disabled]="paginaActual === 1"
+      class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 disabled:opacity-50 disabled:cursor-not-allowed">
       Anterior
     </button>
 
     <div class="flex space-x-2">
-      <button 
-        *ngFor="let pagina of paginas"
-        (click)="irAPagina(pagina)"
-        class="px-3 py-1 rounded-lg"
-        [ngClass]="{
+      <button *ngFor="let pagina of paginas" (click)="irAPagina(pagina)" class="px-3 py-1 rounded-lg" [ngClass]="{
           'bg-blue-500 text-white': pagina === paginaActual,
           'bg-gray-200 text-gray-700 hover:bg-gray-300': pagina !== paginaActual
-        }"
-      >
+        }">
         {{ pagina }}
       </button>
     </div>
 
-    <button 
-      (click)="paginaSiguiente()" 
-      [disabled]="paginaActual === totalPaginas"
-      class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 disabled:opacity-50 disabled:cursor-not-allowed"
-    >
+    <button (click)="paginaSiguiente()" [disabled]="paginaActual === totalPaginas"
+      class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 disabled:opacity-50 disabled:cursor-not-allowed">
       Siguiente
     </button>
   </div>
@@ -145,41 +177,32 @@
     <div class="space-y-4">
       <div>
         <label class="block text-sm font-medium text-gray-700">Presión</label>
-        <input
-          type="text"
-          [(ngModel)]="registroEditando.presion"
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500"
-        />
+        <input type="text" [(ngModel)]="registroEditando.presion"
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500" />
       </div>
       <div>
         <label class="block text-sm font-medium text-gray-700">Temperatura</label>
-        <input
-          type="text"
-          [(ngModel)]="registroEditando.temperatura"
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500"
-        />
+        <input type="text" [(ngModel)]="registroEditando.temperatura"
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500" />
       </div>
       <div>
         <label class="block text-sm font-medium text-gray-700">Fecha de Prueba</label>
-        <input
-          type="date"
-          [(ngModel)]="registroEditando.fecha_prueba"
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500"
-        />
-      </div>  
+        <input type="date" [(ngModel)]="registroEditando.fecha_prueba"
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500" />
+      </div>
       <div>
         <label class="block text-sm font-medium text-gray-700">Observaciones</label>
-        <textarea
-          [(ngModel)]="registroEditando.observaciones"
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500"
-        ></textarea>
+        <textarea [(ngModel)]="registroEditando.observaciones"
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500"></textarea>
       </div>
     </div>
 
     <!-- Botones del Formulario -->
     <div class="mt-6 flex justify-end space-x-4">
-      <button (click)="cancelarEdicion()" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">Cancelar</button>
-      <button (click)="guardarEdicion()" class="px-4 py-2 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600">Guardar</button>
+      <button (click)="cancelarEdicion()"
+        class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">Cancelar</button>
+      <button (click)="guardarEdicion()"
+        class="px-4 py-2 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600">Guardar</button>
     </div>
   </div>
 </div>

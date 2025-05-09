@@ -47,6 +47,7 @@ app.post('/enviar-correo', (req, res) => {
     SELECT 
       u.correo, 
       u.razon_social, 
+      u.nit,
       r.id AS registro_id,
       r.fecha_revision,
       r.estado_prueba,
@@ -65,6 +66,7 @@ app.post('/enviar-correo', (req, res) => {
     }
 
     const {
+      nit,
       correo,
       razon_social,
       registro_id,
@@ -72,6 +74,12 @@ app.post('/enviar-correo', (req, res) => {
       estado_prueba,
       observaciones
     } = results[0];
+
+    const fecha = new Date(fecha_revision);
+    const fechaFormateada = fecha.toLocaleString('es-CO', {
+      dateStyle: 'long',
+      timeStyle: 'medium'
+    });
 
     const transporter = nodemailer.createTransport({
       service: 'gmail',
@@ -94,8 +102,9 @@ app.post('/enviar-correo', (req, res) => {
 
         <table style="border-collapse: collapse; width: 100%; font-family: Arial, sans-serif;">
           <tr><td><strong>ID del Registro:</strong></td><td>${registro_id}</td></tr>
+          <tr><td><strong>NIT:</strong></td><td>${nit}</td></tr>
           <tr><td><strong>Razón Social:</strong></td><td>${razon_social}</td></tr>
-          <tr><td><strong>Fecha de Inspección:</strong></td><td>${fecha_revision}</td></tr>
+          <tr><td><strong>Fecha de Inspección:</strong></td><td>${fechaFormateada}</td></tr>
           <tr><td><strong>Tipo de Prueba:</strong></td><td>${estado_prueba}</td></tr>
           <tr><td><strong>Observaciones:</strong></td><td>${observaciones || 'Ninguna'}</td></tr>
         </table>
@@ -125,10 +134,6 @@ app.post('/enviar-correo', (req, res) => {
   });
 });
 
-
-
-
-
 // Nuevo endpoint para obtener el resumen de actividad
 app.get('/api/resumen', (req, res) => {
   const query = `
@@ -146,7 +151,6 @@ app.get('/api/resumen', (req, res) => {
     res.status(200).json(result[0]);
   });
 });
-
 
 // Ruta para registrar información técnica
 app.post('/registros_tecnicos', upload.array('imagenes'), (req, res) => {
@@ -248,6 +252,7 @@ app.get('/registros_tecnicos', (req, res) => {
       u.razon_social AS cliente_nombre
     FROM registros_tecnicos rt
     LEFT JOIN usuario u ON rt.usuario_nit = u.nit
+    ORDER BY rt.id DESC
     LIMIT ? OFFSET ?
   `;
 
@@ -301,8 +306,7 @@ app.put('/registros_tecnicos/:id', (req, res) => {
   });
 });
 
-
-  // Ruta para actualizar un registro técnico
+ // Ruta para actualizar un registro técnico
   app.put('/registros/:id', (req, res) => {
     const registroId = req.params.id; // Obtén el ID del registro a actualizar
     const { presion, temperatura, fecha_prueba, observaciones } = req.body; // Datos actualizados
