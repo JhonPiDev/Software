@@ -7,11 +7,14 @@ const multer = require('multer');
 const { jsPDF } = require('jspdf');
 const { autoTable } = require('jspdf-autotable');
 const path = require('path');
+const nodemailer = require('nodemailer');
+
 
 const app = express();
 const port = 3000;
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
+
 
 // Configura CORS para permitir solicitudes desde Angular
 app.use(cors());
@@ -35,6 +38,94 @@ db.connect((err) => {
   }
   console.log('✅ Conectado a MySQL');
 });
+
+
+app.post('/enviar-correo', (req, res) => {
+  const { id } = req.body;
+
+  db.query(`
+    SELECT 
+      u.correo, 
+      u.razon_social, 
+      r.id AS registro_id,
+      r.fecha_revision,
+      r.estado_prueba,
+      r.observaciones
+    FROM registros_tecnicos r
+    JOIN usuario u ON r.usuario_nit = u.nit
+    WHERE r.id = ?
+  `, [id], async (err, results) => {
+    if (err) {
+      console.error('Error en la consulta:', err);
+      return res.status(500).json({ error: 'Error en la base de datos' });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({ error: 'Registro técnico no encontrado o usuario sin correo.' });
+    }
+
+    const {
+      correo,
+      razon_social,
+      registro_id,
+      fecha_revision,
+      estado_prueba,
+      observaciones
+    } = results[0];
+
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: 'jhonpinto008@gmail.com',
+        pass: 'pfjjwkwdeodyeacw'
+      }
+    });
+
+    const mailOptions = {
+      from: 'jhonpinto008@gmail.com',
+      to: correo,
+      subject: `Informe de Inspección Técnica – Registro N.º ${registro_id}`,
+      html: `
+        <p>Estimado/a <strong>${razon_social}</strong>,</p>
+
+        <p>Nos permitimos informarle que el proceso de inspección correspondiente al registro técnico N.º <strong>${registro_id}</strong> ha sido finalizado exitosamente.</p>
+
+        <p>A continuación, encontrará un resumen detallado de la inspección realizada:</p>
+
+        <table style="border-collapse: collapse; width: 100%; font-family: Arial, sans-serif;">
+          <tr><td><strong>ID del Registro:</strong></td><td>${registro_id}</td></tr>
+          <tr><td><strong>Razón Social:</strong></td><td>${razon_social}</td></tr>
+          <tr><td><strong>Fecha de Inspección:</strong></td><td>${fecha_revision}</td></tr>
+          <tr><td><strong>Tipo de Prueba:</strong></td><td>${estado_prueba}</td></tr>
+          <tr><td><strong>Observaciones:</strong></td><td>${observaciones || 'Ninguna'}</td></tr>
+        </table>
+
+        <p>Le recordamos que este informe forma parte del cumplimiento normativo y garantiza que los procedimientos han sido realizados conforme a los estándares establecidos por Truck Services SAS.</p>
+
+        <p>Si tiene alguna duda o desea obtener una copia del acta oficial, no dude en comunicarse con nuestro equipo de soporte.</p>
+
+        <br>
+        <p>Gracias por su confianza.</p>
+
+        <p>Atentamente,</p>
+        <p><strong>Equipo Técnico de Truck Services SAS</strong></p>
+        <p>NIT: 901.705.963-2</p>
+        <p>📧 contacto@truckservices.com.co</p>
+        <p>🌐 <a href="https://www.truckservices.com.co" target="_blank">www.truckservices.com.co</a></p>
+      `
+    };
+
+    try {
+      await transporter.sendMail(mailOptions);
+      res.json({ message: 'Correo enviado exitosamente' });
+    } catch (error) {
+      console.error('Error al enviar correo:', error);
+      res.status(500).json({ error: 'Error al enviar el correo' });
+    }
+  });
+});
+
+
 
 
 
@@ -211,41 +302,41 @@ app.put('/registros_tecnicos/:id', (req, res) => {
 });
 
 
-// Ruta para actualizar un registro técnico
-app.put('/registros/:id', (req, res) => {
-  const registroId = req.params.id; // Obtén el ID del registro a actualizar
-  const { presion, temperatura, fecha_prueba, observaciones } = req.body; // Datos actualizados
+  // Ruta para actualizar un registro técnico
+  app.put('/registros/:id', (req, res) => {
+    const registroId = req.params.id; // Obtén el ID del registro a actualizar
+    const { presion, temperatura, fecha_prueba, observaciones } = req.body; // Datos actualizados
 
-  // Formatear la fecha para MySQL
-  let formattedFechaPrueba;
-  if (fecha_prueba) {
-    const date = new Date(fecha_prueba);
-    formattedFechaPrueba = date.toISOString().split('T')[0]; // Para DATE (YYYY-MM-DD)
-    // Si la columna es DATETIME, usa:
-    // formattedFechaPrueba = date.toISOString().replace('T', ' ').split('.')[0]; // Para DATETIME (YYYY-MM-DD HH:mm:ss)
-  } else {
-    return res.status(400).json({ message: 'El campo fecha_prueba es obligatorio' });
-  }
-
-  const query = `
-    UPDATE registros_tecnicos
-    SET presion = ?, temperatura = ?, fecha_prueba = ?, observaciones = ?
-    WHERE id = ?
-  `;
-
-  db.query(query, [presion, temperatura, formattedFechaPrueba, observaciones, registroId], (err, result) => {
-    if (err) {
-      console.error('Error al actualizar registro:', err);
-      return res.status(500).json({ message: 'Error al actualizar registro' });
+    // Formatear la fecha para MySQL
+    let formattedFechaPrueba;
+    if (fecha_prueba) {
+      const date = new Date(fecha_prueba);
+      formattedFechaPrueba = date.toISOString().split('T')[0]; // Para DATE (YYYY-MM-DD)
+      // Si la columna es DATETIME, usa:
+      // formattedFechaPrueba = date.toISOString().replace('T', ' ').split('.')[0]; // Para DATETIME (YYYY-MM-DD HH:mm:ss)
+    } else {
+      return res.status(400).json({ message: 'El campo fecha_prueba es obligatorio' });
     }
 
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ message: 'Registro no encontrado' });
-    }
+    const query = `
+      UPDATE registros_tecnicos
+      SET presion = ?, temperatura = ?, fecha_prueba = ?, observaciones = ?
+      WHERE id = ?
+    `;
 
-    res.json({ message: 'Registro actualizado correctamente' });
+    db.query(query, [presion, temperatura, formattedFechaPrueba, observaciones, registroId], (err, result) => {
+      if (err) {
+        console.error('Error al actualizar registro:', err);
+        return res.status(500).json({ message: 'Error al actualizar registro' });
+      }
+
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ message: 'Registro no encontrado' });
+      }
+
+      res.json({ message: 'Registro actualizado correctamente' });
+    });
   });
-});
 
 // ** Ruta para registrar un usuario **
 app.post('/register', async (req, res) => {

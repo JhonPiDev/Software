@@ -151,4 +151,100 @@ input {
     transform: translateY(2px);
     box-shadow: none;
   }
+  .button {
+    --primary: #ff5569;
+    --neutral-1: #f7f8f7;
+    --neutral-2: #e7e7e7;
+    --radius: 14px;
+    cursor: pointer;
+    border-radius: var(--radius);
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
+    border: none;
+    box-shadow: 0 0.5px 0.5px 1px rgba(255, 255, 255, 0.2),
+      0 10px 20px rgba(0, 0, 0, 0.2), 0 4px 5px 0px rgba(0, 0, 0, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    transition: all 0.3s ease;
+    min-width: 200px;
+    padding: 20px;
+    height: 68px;
+    font-family: "Galano Grotesque", Poppins, Montserrat, sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+  }
+  
+  .button:hover {
+    transform: scale(1.02);
+    box-shadow: 0 0 1px 2px rgba(255, 255, 255, 0.3),
+      0 15px 30px rgba(0, 0, 0, 0.3), 0 10px 3px -3px rgba(0, 0, 0, 0.04);
+  }
+  
+  .button:active {
+    transform: scale(1);
+    box-shadow: 0 0 1px 2px rgba(255, 255, 255, 0.3),
+      0 10px 3px -3px rgba(0, 0, 0, 0.2);
+  }
+  
+  /* Continúa con el resto de tus estilos de .button */
+/* Estilo exclusivo para el botón "Enviar Correo" */
+.btn-enviar-correo {
+  font-family: inherit;
+  font-size: 18px;
+  background: linear-gradient(to bottom, #4dc7d9 0%, #66a6ff 100%);
+  color: white;
+  padding: 0.8em 1.2em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 25px;
+  box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s;
+  cursor: pointer;
+}
+
+.btn-enviar-correo:hover {
+  transform: translateY(-3px);
+  box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.3);
+}
+
+.btn-enviar-correo:active {
+  transform: scale(0.95);
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.btn-enviar-correo span {
+  display: block;
+  margin-left: 0.4em;
+  transition: all 0.3s;
+}
+
+.btn-enviar-correo svg {
+  width: 18px;
+  height: 18px;
+  fill: white;
+  transition: all 0.3s;
+}
+
+.btn-enviar-correo .svg-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.2);
+  margin-right: 0.5em;
+  transition: all 0.3s;
+}
+
+.btn-enviar-correo:hover .svg-wrapper {
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
+.btn-enviar-correo:hover svg {
+  transform: rotate(45deg);
+}
   

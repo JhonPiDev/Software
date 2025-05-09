@@ -166,6 +166,28 @@ export class HistorialPruebasComponent implements OnInit {
     return date.toISOString().split('T')[0];
   }
 
+  enviarCorreo(registro: any) {
+    this.http.post(`http://localhost:3000/enviar-correo`, { id: registro.id }).subscribe(
+      () => {
+        Swal.fire({
+          icon: 'success',
+          title: 'Correo enviado',
+          text: `El correo fue enviado al cliente: ${registro.cliente_correo}`,
+          timer: 2500,
+          showConfirmButton: false
+        });
+      },
+      error => {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error al enviar',
+          text: 'Hubo un problema al enviar el correo.'
+        });
+        console.error('Error al enviar correo:', error);
+      }
+    );
+  }
+  
   // Exportar un solo registro a PDF
   exportarRegistroPDF(registro: any) {
     const doc = new jsPDF();
@@ -196,11 +218,11 @@ export class HistorialPruebasComponent implements OnInit {
       doc.text(`Generado el: ${new Date().toLocaleDateString()}`, 20, 287);
     };
   
-    const imagesPerPage = 3;
+    const imagesPerPage = 4;
     const extraImagePages = registro.imagenes && registro.imagenes.length > 0
       ? Math.ceil(registro.imagenes.length / imagesPerPage)
       : 0;
-    const basePages = 3;
+    const basePages = 4;
     let totalPages = basePages + extraImagePages;
   
     const logo = new Image();
@@ -325,11 +347,11 @@ export class HistorialPruebasComponent implements OnInit {
     doc.text('Resumen:', 20, finalY + 12);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(0, 0, 0);
-    const resumen = `La prueba hidrostática para el registro #${registro.id} fue realizada [...] El estado final de la prueba es "${registro.estado_prueba || 'No especificado'}".`;
+    const resumen = `La prueba hidrostática correspondiente al registro #${registro.id} fue llevada a cabo conforme a la normativa vigente, asegurando el cumplimiento de los estándares de presión, temperatura y hermeticidad. El estado final de la prueba fue determinado como: "**${registro.estado_prueba || 'No especificado'}**". Este resultado refleja las condiciones observadas durante el procedimiento, garantizando la seguridad y funcionalidad del tanque evaluado.`;
     const resumenLines = doc.splitTextToSize(resumen, 170);
     doc.text(resumenLines, 20, finalY + 18);
   
-    const obsY = finalY + 18 + resumenLines.length * 6 + 10;
+    const obsY = finalY + 18 + resumenLines.length * 6 + 3;
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(12);
     doc.setTextColor(0, 102, 204);
@@ -338,113 +360,110 @@ export class HistorialPruebasComponent implements OnInit {
     doc.setFontSize(10);
     doc.setTextColor(0, 0, 0);
     const obsText = doc.splitTextToSize(registro.observaciones || 'Ninguna observación registrada.', 170);
-    doc.text(obsText, 20, obsY + 6);
+    doc.text(obsText, 20, obsY + 5);
   
     addHeaderFooter(currentPage, totalPages);
   
     // Página 3+ - Imágenes
-    if (registro.imagenes && registro.imagenes.length > 0) {
-      doc.addPage();
-      currentPage++;
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(14);
-      doc.setTextColor(0, 102, 204);
-      doc.text('4. Imágenes de la Prueba', 20, 30);
-      doc.line(20, 32, 190, 32);
-  
-      let y = 40;
-      let index = 0;
-  
-      while (index < registro.imagenes.length) {
+    // Página 3+ - Imágenes
+if (registro.imagenes && registro.imagenes.length > 0) {
+  const maxImages = Math.min(registro.imagenes.length, 10); // máximo 10 imágenes
+  let index = 0;
+
+  while (index < maxImages) {
+    doc.addPage();
+    currentPage++;
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(14);
+    doc.setTextColor(0, 102, 204);
+    doc.text(`4. Imágenes de la Prueba${index >= 4 ? ' (Continuación)' : ''}`, 20, 30);
+    doc.setDrawColor(0, 102, 204);
+    doc.line(20, 32, 190, 32);
+
+    let xPositions = [25, 110];
+    let yPositions = [40, 140];
+    let imgWidth = 70;
+    let imgHeight = 80;
+
+    for (let row = 0; row < 2 && index < maxImages; row++) {
+      for (let col = 0; col < 2 && index < maxImages; col++) {
         const image = registro.imagenes[index];
         try {
           const imgData = image.startsWith('data:image') ? image : `data:image/png;base64,${image}`;
-          doc.addImage(imgData, 'PNG', 55, y, 100, 80);
+          const x = xPositions[col];
+          const y = yPositions[row];
+          doc.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight);
           doc.setFont('helvetica', 'italic');
-          doc.setFontSize(10);
-          doc.text(`Imagen ${index + 1}`, 105, y + 85, { align: 'center' });
-  
-          y += 90;
-          if (y > 220 && index < registro.imagenes.length - 1) {
-            addHeaderFooter(currentPage, totalPages);
-            doc.addPage();
-            currentPage++;
-            y = 40;
-            doc.setFont('helvetica', 'bold');
-            doc.setFontSize(14);
-            doc.setTextColor(0, 102, 204);
-            doc.text('4. Imágenes de la Prueba (Continuación)', 20, 30);
-            doc.line(20, 32, 190, 32);
-          }
-  
-          index++;
+          doc.setFontSize(9);
+          doc.text(`Imagen ${index + 1}`, x + imgWidth / 2, y + imgHeight + 5, { align: 'center' });
         } catch (error) {
           console.error('Error al agregar imagen:', error);
-          index++;
         }
+        index++;
       }
-  
-      addHeaderFooter(currentPage, totalPages);
-    } else {
-      doc.addPage();
-      currentPage++;
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(14);
-      doc.setTextColor(0, 102, 204);
-      doc.text('4. Imágenes de la Prueba', 20, 30);
-      doc.line(20, 32, 190, 32);
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(10);
-      doc.setTextColor(0, 0, 0);
-      doc.text('Sin imágenes adjuntas.', 20, 40);
-      addHeaderFooter(currentPage, totalPages);
-    } 
-    // Página final - Firma del inspector
-if (registro.firma_inspector) {
+    }
+
+    addHeaderFooter(currentPage, totalPages); // mantén el totalPages actualizado luego si agregas la firma
+  }
+} else {
   doc.addPage();
   currentPage++;
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(14);
   doc.setTextColor(0, 102, 204);
-  doc.text('5. Firma del Inspector', 20, 30);
+  doc.text('4. Imágenes de la Prueba', 20, 30);
   doc.line(20, 32, 190, 32);
-
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(11);
+  doc.setFontSize(10);
   doc.setTextColor(0, 0, 0);
-  doc.text('A continuación se presenta la firma digital del inspector responsable de esta prueba:', 20, 40);
-
-  try {
-    const firmaData = registro.firma_inspector.startsWith('data:image')
-      ? registro.firma_inspector
-      : `data:image/png;base64,${registro.firma_inspector}`;
-
-    // Agrega imagen de la firma
-    doc.addImage(firmaData, 'PNG', 80, 60, 50, 30); // posición y tamaño
-    doc.setDrawColor(0, 102, 204);
-    doc.rect(75, 55, 60, 40); // Marco elegante
-
-    // Nombre e identificación (puedes agregar campos si los tienes)
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'italic');
-    doc.text('Inspector Responsable', 105, 100, { align: 'center' });
-
-  } catch (error) {
-    console.error('Error al cargar la firma del inspector:', error);
-    doc.setTextColor(255, 0, 0);
-    doc.text('Error al cargar la firma del inspector.', 20, 60);
-  }
-
-  addHeaderFooter(currentPage, totalPages + 1); // suma una página más
-  totalPages++;
+  doc.text('Sin imágenes adjuntas.', 20, 40);
+  addHeaderFooter(currentPage, totalPages);
 }
+
+    // Página final - Firma del inspector
+  // if (registro.firma_inspector) {
+  //   doc.addPage();
+  //   currentPage++;
+  //   doc.setFont('helvetica', 'bold');
+  //   doc.setFontSize(14);
+  //   doc.setTextColor(0, 102, 204);
+  //   doc.text('5. Firma del Inspector', 20, 30);
+  //   doc.line(20, 32, 190, 32);
+
+  //   doc.setFont('helvetica', 'normal');
+  //   doc.setFontSize(11);
+  //   doc.setTextColor(0, 0, 0);
+  //   doc.text('A continuación se presenta la firma digital del inspector responsable de esta prueba:', 20, 40);
+
+  //   try {
+  //     const firmaData = registro.firma_inspector.startsWith('data:image')
+  //       ? registro.firma_inspector
+  //       : `data:image/png;base64,${registro.firma_inspector}`;
+
+  //     // Agrega imagen de la firma
+  //     doc.addImage(firmaData, 'PNG', 80, 60, 50, 30); // posición y tamaño
+  //     doc.setDrawColor(0, 102, 204);
+  //     doc.rect(75, 55, 60, 40); // Marco elegante
+
+  //     // Nombre e identificación (puedes agregar campos si los tienes)
+  //     doc.setFontSize(10);
+  //     doc.setFont('helvetica', 'italic');
+  //     doc.text('Inspector Responsable', 105, 100, { align: 'center' });
+
+  //   } catch (error) {
+  //     console.error('Error al cargar la firma del inspector:', error);
+  //     doc.setTextColor(255, 0, 0);
+  //     doc.text('Error al cargar la firma del inspector.', 20, 60);
+  //   }
+
+  //   addHeaderFooter(currentPage, totalPages + 1); // suma una página más
+  //   totalPages++;
+  // }
 
     doc.save(`Declaracion_LT_${registro.id}.pdf`);
   }
   
-  
-  
-
   // Exportar todos los registros a PDF
   exportarPDF() {
     const doc = new jsPDF();
